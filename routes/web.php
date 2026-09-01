@@ -20,7 +20,12 @@ Route::post('/categorias', [CategoriaController::class, 'store']);
 Route::get('/categorias/{id}', [CategoriaController::class, 'show']);
 
 // Rutas para Productos (Inventario de repuestos)
-Route::get('/productos', [ProductoController::class, 'index']);
+Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+Route::get('/productos/crear', [ProductoController::class, 'create'])->name('productos.create');
+Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
+Route::get('/productos/{id}/editar', [ProductoController::class, 'edit'])->name('productos.edit');
+Route::put('/productos/{id}', [ProductoController::class, 'update'])->name('productos.update');
+Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
 
 // Rutas para Clientes
 Route::get('/clientes', [ClienteController::class, 'index']);
