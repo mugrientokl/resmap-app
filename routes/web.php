@@ -33,6 +33,9 @@ Route::post('/clientes', [ClienteController::class, 'store']);
 Route::get('/clientes/{id}', [ClienteController::class, 'show']);
 
 // Rutas para Ventas / POS (Boletas y Facturas DTE)
+Route::get('/pos', function () {
+    return view('pos.index');
+});
 Route::post('/ventas', [VentaController::class, 'store']);
 
 // Rutas para Detalles de Venta
