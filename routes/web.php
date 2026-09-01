@@ -15,9 +15,12 @@ Route::get('/', function () {
 });
 
 // Rutas para Categorías
-Route::get('/categorias', [CategoriaController::class, 'index']);
-Route::post('/categorias', [CategoriaController::class, 'store']);
-Route::get('/categorias/{id}', [CategoriaController::class, 'show']);
+Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
+Route::get('/categorias/crear', [CategoriaController::class, 'create'])->name('categorias.create');
+Route::post('/categorias', [CategoriaController::class, 'store'])->name('categorias.store');
+Route::get('/categorias/{id}/editar', [CategoriaController::class, 'edit'])->name('categorias.edit');
+Route::put('/categorias/{id}', [CategoriaController::class, 'update'])->name('categorias.update');
+Route::delete('/categorias/{id}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
 
 // Rutas para Productos (Inventario de repuestos)
 Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
@@ -28,9 +31,10 @@ Route::put('/productos/{id}', [ProductoController::class, 'update'])->name('prod
 Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
 
 // Rutas para Clientes
-Route::get('/clientes', [ClienteController::class, 'index']);
-Route::post('/clientes', [ClienteController::class, 'store']);
-Route::get('/clientes/{id}', [ClienteController::class, 'show']);
+Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+Route::get('/clientes/{id}/editar', [ClienteController::class, 'edit'])->name('clientes.edit');
+Route::put('/clientes/{id}', [ClienteController::class, 'update'])->name('clientes.update');
+Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
 
 // Rutas para Ventas / POS (Boletas y Facturas DTE)
 Route::get('/pos', function () {

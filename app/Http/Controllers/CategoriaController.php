@@ -9,31 +9,52 @@ class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::with('productos')->get();
-        return response()->json($categorias);
+        $categorias = Categoria::all();
+        return view('categorias.index', compact('categorias'));
+    }
+
+    public function create()
+    {
+        return view('categorias.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_categoria' => 'required|string|max:255',
+            'nombre_categoria' => 'required|string|max:255|unique:categorias,nombre_categoria',
             'descripcion' => 'nullable|string',
         ]);
 
-        $categoria = Categoria::create([
-            'nombre_categoria' => $request->nombre_categoria,
-            'descripcion' => $request->descripcion,
-        ]);
+        Categoria::create($request->all());
 
-        return response()->json([
-            'message' => 'Categoría creada con éxito.',
-            'categoria' => $categoria
-        ], 201);
+        return redirect()->route('categorias.index')->with('success', 'Categoría creada con éxito.');
     }
 
-    public function show($id)
+    public function edit($id)
     {
-        $categoria = Categoria::with('productos')->findOrFail($id);
-        return response()->json($categoria);
+        $categoria = Categoria::findOrFail($id);
+        return view('categorias.edit', compact('categoria'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $categoria = Categoria::findOrFail($id);
+
+        $request->validate([
+            'nombre_categoria' => 'required|string|max:255|unique:categorias,nombre_categoria,' . $id . ',id_categoria',
+            'descripcion' => 'nullable|string',
+        ]);
+
+        $categoria->update($request->all());
+
+        return redirect()->route('categorias.index')->with('success', 'Categoría actualizada con éxito.');
+    }
+
+    public function destroy($id)
+    {
+        $categoria = Categoria::findOrFail($id);
+        $categoria->delete();
+
+        return redirect()->route('categorias.index')->with('success', 'Categoría eliminada con éxito.');
     }
 }

@@ -9,30 +9,38 @@ class ClienteController extends Controller
 {
     public function index()
     {
-        return response()->json(Cliente::all());
+        $clientes = Cliente::all();
+        return view('clientes.index', compact('clientes'));
     }
 
-    public function store(Request $request)
+    public function edit($id)
     {
+        $cliente = Cliente::findOrFail($id);
+        return view('clientes.edit', compact('cliente'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $cliente = Cliente::findOrFail($id);
+
         $request->validate([
-            'rut' => 'required|string|unique:clientes,rut',
+            'rut' => 'required|string|max:20|unique:clientes,rut,' . $id . ',id_cliente',
             'nombre' => 'required|string|max:255',
             'correo' => 'nullable|email|max:255',
             'telefono' => 'nullable|string|max:50',
             'direccion' => 'nullable|string|max:255',
         ]);
 
-        $cliente = Cliente::create($request->all());
+        $cliente->update($request->all());
 
-        return response()->json([
-            'message' => 'Cliente registrado con éxito.',
-            'cliente' => $cliente
-        ], 201);
+        return redirect()->route('clientes.index')->with('success', 'Cliente actualizado con éxito.');
     }
 
-    public function show($id)
+    public function destroy($id)
     {
-        $cliente = Cliente::with(['ventas', 'solicitudesWeb'])->findOrFail($id);
-        return response()->json($cliente);
+        $cliente = Cliente::findOrFail($id);
+        $cliente->delete();
+
+        return redirect()->route('clientes.index')->with('success', 'Cliente eliminado con éxito.');
     }
 }
