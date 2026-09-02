@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CategoriaController extends Controller
 {
@@ -20,10 +21,24 @@ class CategoriaController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre_categoria' => 'required|string|max:255|unique:categorias,nombre_categoria',
+        $validator = Validator::make($request->all(), [
+            'nombre_categoria' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:categorias,nombre_categoria',
+                'not_regex:/^\d+$/',
+            ],
             'descripcion' => 'nullable|string',
+        ], [
+            'nombre_categoria.not_regex' => 'El nombre de la categoría no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('categorias.index')
+                ->withErrors($validator, 'create')
+                ->withInput();
+        }
 
         Categoria::create($request->all());
 
@@ -38,13 +53,27 @@ class CategoriaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $categoria = Categoria::findOrFail($id);
-
-        $request->validate([
-            'nombre_categoria' => 'required|string|max:255|unique:categorias,nombre_categoria,' . $id . ',id_categoria',
+        $validator = Validator::make($request->all(), [
+            'nombre_categoria' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:categorias,nombre_categoria,' . $id . ',id_categoria',
+                'not_regex:/^\d+$/',
+            ],
             'descripcion' => 'nullable|string',
+        ], [
+            'nombre_categoria.not_regex' => 'El nombre de la categoría no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->route('categorias.index')
+                ->withErrors($validator, 'edit')
+                ->withInput()
+                ->with('edit_id', $id);
+        }
+
+        $categoria = Categoria::findOrFail($id);
         $categoria->update($request->all());
 
         return redirect()->route('categorias.index')->with('success', 'Categoría actualizada con éxito.');

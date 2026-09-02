@@ -24,12 +24,19 @@ class ProductoController extends Controller
     {
         $request->validate([
             'codigo_barra' => 'required|string|unique:productos,codigo_barra',
-            'nombre' => 'required|string|max:255',
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                'not_regex:/^\d+$/',
+            ],
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'stock_critico' => 'required|integer|min:0',
             'id_categoria' => 'required|exists:categorias,id_categoria',
+        ], [
+            'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
 
         Producto::create($request->all());
@@ -50,12 +57,19 @@ class ProductoController extends Controller
 
         $request->validate([
             'codigo_barra' => 'required|string|unique:productos,codigo_barra,' . $id . ',id_producto',
-            'nombre' => 'required|string|max:255',
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                'not_regex:/^\d+$/',
+            ],
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'stock_critico' => 'required|integer|min:0',
             'id_categoria' => 'required|exists:categorias,id_categoria',
+        ], [
+            'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
 
         $producto->update($request->all());
