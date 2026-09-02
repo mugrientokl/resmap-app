@@ -35,9 +35,10 @@ class CategoriaController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('categorias.index')
-                ->withErrors($validator, 'create')
-                ->withInput();
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($validator)
+                ->with('validation_error', $validator->errors()->first());
         }
 
         Categoria::create($request->all());
@@ -53,6 +54,8 @@ class CategoriaController extends Controller
 
     public function update(Request $request, $id)
     {
+        $categoria = Categoria::findOrFail($id);
+
         $validator = Validator::make($request->all(), [
             'nombre_categoria' => [
                 'required',
@@ -67,13 +70,12 @@ class CategoriaController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('categorias.index')
-                ->withErrors($validator, 'edit')
+            return redirect()->back()
                 ->withInput()
-                ->with('edit_id', $id);
+                ->withErrors($validator)
+                ->with('validation_error', $validator->errors()->first());
         }
 
-        $categoria = Categoria::findOrFail($id);
         $categoria->update($request->all());
 
         return redirect()->route('categorias.index')->with('success', 'Categoría actualizada con éxito.');

@@ -13,6 +13,13 @@
         </div>
     @endif
 
+    @if(session('validation_error'))
+        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <p class="font-medium">No se pudo guardar la categoría:</p>
+            <p>{{ session('validation_error') }}</p>
+        </div>
+    @endif
+
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -33,7 +40,7 @@
                         <button onclick="openEditModal('{{ $cat->id_categoria }}', '{{ addslashes($cat->nombre_categoria) }}', '{{ addslashes($cat->descripcion ?? '') }}')" 
                             class="text-indigo-600 hover:text-indigo-900">Editar</button>
                         
-                        <form action="{{ route('categorias.destroy', $cat->id_categoria) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar esta categoría?');">
+                        <form action="{{ route('categorias.destroy', $cat->id_categoria, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar esta categoría?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
@@ -49,22 +56,28 @@
 <!-- MODAL CREAR CATEGORÍA -->
 <div id="createModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
-        <form action="{{ route('categorias.store') }}" method="POST">
+        <form action="{{ route('categorias.store', absolute: false) }}" method="POST" onsubmit="return validateCategoryForm(this)">
             @csrf
+            <input type="hidden" name="form_type" value="create">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-gray-800">Nueva Categoría</h3>
                 <button type="button" onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="category-validation-error hidden mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md" role="alert">
+                <p class="font-medium">No se puede guardar la categoría</p>
+                <p class="validation-message text-sm mt-1"></p>
             </div>
             
             <div class="p-6 space-y-4">
                 <div>
                     <label for="nombre_categoria" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</label>
                     <input type="text" id="nombre_categoria" name="nombre_categoria" value="{{ old('nombre_categoria') }}" 
-                        class="w-full px-3 py-2 border @error('nombre_categoria', 'create') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border @if($errors->has('nombre_categoria') && old('form_type') != 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     
-                    @error('nombre_categoria', 'create')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    @if($errors->has('nombre_categoria') && old('form_type') != 'edit')
+                        <p class="text-red-500 text-xs mt-1">{{ $errors->first('nombre_categoria') }}</p>
+                    @endif
                 </div>
 
                 <div>
@@ -85,29 +98,39 @@
 <!-- MODAL EDITAR CATEGORÍA -->
 <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
-        <form id="editForm" method="POST">
+        <form id="editForm" method="POST" onsubmit="return validateCategoryForm(this)">
             @csrf
             @method('PUT')
+            <input type="hidden" name="form_type" value="edit">
+            <input type="hidden" id="edit_categoria_id" name="categoria_id" value="{{ old('categoria_id') }}">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-gray-800">Editar Categoría</h3>
                 <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="category-validation-error hidden mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md" role="alert">
+                <p class="font-medium">No se puede actualizar la categoría</p>
+                <p class="validation-message text-sm mt-1"></p>
             </div>
             
             <div class="p-6 space-y-4">
                 <div>
                     <label for="edit_nombre_categoria" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</label>
                     <input type="text" id="edit_nombre_categoria" name="nombre_categoria" value="{{ old('nombre_categoria') }}"
-                        class="w-full px-3 py-2 border @error('nombre_categoria', 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="w-full px-3 py-2 border @if($errors->has('nombre_categoria') && old('form_type') == 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     
-                    @error('nombre_categoria', 'edit')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    @if($errors->has('nombre_categoria') && old('form_type') == 'edit')
+                        <p class="text-red-500 text-xs mt-1">{{ $errors->first('nombre_categoria') }}</p>
+                    @endif
                 </div>
 
                 <div>
                     <label for="edit_descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción (Opcional)</label>
                     <textarea id="edit_descripcion" name="descripcion" rows="3" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ old('descripcion') }}</textarea>
+                        class="w-full px-3 py-2 border @if($errors->has('descripcion') && old('form_type') == 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ old('descripcion') }}</textarea>
+                    @if($errors->has('descripcion') && old('form_type') == 'edit')
+                        <p class="text-red-500 text-xs mt-1">{{ $errors->first('descripcion') }}</p>
+                    @endif
                 </div>
             </div>
 
@@ -119,7 +142,7 @@
     </div>
 </div>
 
-<!-- Scripts de control y validación automática de modales -->
+<!-- Scripts de control -->
 <script>
     function openCreateModal() {
         document.getElementById('createModal').classList.remove('hidden');
@@ -138,18 +161,43 @@
         document.getElementById('editModal').classList.add('hidden');
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        @if ($errors->create->any())
-            openCreateModal();
-        @endif
+    function validateCategoryForm(form) {
+        let categoryName = form.querySelector('input[name="nombre_categoria"]').value.trim();
+        let validationError = form.querySelector('.category-validation-error');
+        let validationMessage = validationError.querySelector('.validation-message');
 
-        @if ($errors->edit->any())
-            let failedId = "{{ session('edit_id') }}";
-            let oldNombre = "{{ old('nombre_categoria') }}";
-            let oldDesc = "{{ old('descripcion') }}";
-            if (failedId) {
-                openEditModal(failedId, oldNombre, oldDesc);
-            }
+        validationError.classList.add('hidden');
+        validationMessage.textContent = '';
+
+        if (!categoryName) {
+            showCategoryValidationError(validationError, validationMessage, 'El nombre de la categoría es obligatorio.');
+            return false;
+        }
+
+        if (/^\d+$/.test(categoryName)) {
+            showCategoryValidationError(validationError, validationMessage, 'El nombre de la categoría no puede contener únicamente números; debe incluir al menos una letra.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function showCategoryValidationError(validationError, validationMessage, message) {
+        validationMessage.textContent = message;
+        validationError.classList.remove('hidden');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        @if (session('validation_error') || $errors->any())
+            @if(old('form_type') == 'edit')
+                let editCategoriaId = document.getElementById('edit_categoria_id').value;
+                if (editCategoriaId) {
+                    document.getElementById('editForm').action = "/categorias/" + editCategoriaId;
+                }
+                document.getElementById('editModal').classList.remove('hidden');
+            @else
+                openCreateModal();
+            @endif
         @endif
     });
 </script>
