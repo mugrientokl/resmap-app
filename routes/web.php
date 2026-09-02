@@ -1,6 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
@@ -9,7 +15,14 @@ use App\Http\Controllers\DetalleVentaController;
 use App\Http\Controllers\SolicitudWebController;
 use App\Http\Controllers\UserController;
 
-Route::middleware(['web'])->group(function () {
+Route::middleware([
+    EncryptCookies::class,
+    AddQueuedCookiesToResponse::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+    SubstituteBindings::class,
+])->group(function () {
 
     // Ruta principal de bienvenida o dashboard temporal
     Route::get('/', function () {

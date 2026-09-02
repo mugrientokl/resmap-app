@@ -45,7 +45,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                         <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                        <form action="{{ route('productos.destroy', $producto->id_producto) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                        <form action="{{ route('productos.destroy', $producto->id_producto, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>

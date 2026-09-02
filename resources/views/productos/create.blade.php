@@ -4,18 +4,17 @@
 <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Crear Nuevo Producto / Repuesto</h2>
 
-    @if ($errors->any())
-        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <strong class="font-bold">¡Atención!</strong>
-            <ul class="mt-2 list-disc list-inside text-sm">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    @if (session('validation_error') || $errors->any())
+        <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md" role="alert">
+            <span class="text-red-600 text-lg" aria-hidden="true">!</span>
+            <div>
+                <p class="font-semibold">No se pudo guardar el producto</p>
+                <p class="text-sm mt-1">{{ session('validation_error', $errors->first()) }}</p>
+            </div>
         </div>
     @endif
 
-    <form action="{{ route('productos.store') }}" method="POST" class="space-y-4">
+    <form action="{{ route('productos.store', absolute: false) }}" method="POST" class="space-y-4" onsubmit="return validateProductForm(this)">
         @csrf
 
         <div>
@@ -26,6 +25,14 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Nombre del Repuesto</label>
             <input type="text" name="nombre" value="{{ old('nombre') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+        </div>
+
+        <div class="product-validation-error hidden items-start gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md" role="alert" aria-live="polite">
+            <span class="text-red-600 text-lg" aria-hidden="true">!</span>
+            <div>
+                <p class="font-semibold">Revisa los datos del producto</p>
+                <p class="product-validation-message text-sm mt-1"></p>
+            </div>
         </div>
 
         <div>
@@ -66,4 +73,29 @@
         </div>
     </form>
 </div>
+
+<script>
+    function validateProductForm(form) {
+        let errorBox = form.querySelector('.product-validation-error');
+        let errorMessage = form.querySelector('.product-validation-message');
+        let productName = form.querySelector('input[name="nombre"]').value.trim();
+
+        errorBox.classList.add('hidden');
+        errorMessage.textContent = '';
+
+        if (!productName) {
+            errorMessage.textContent = 'El nombre del repuesto es obligatorio.';
+            errorBox.classList.remove('hidden');
+            return false;
+        }
+
+        if (/^\d+$/.test(productName)) {
+            errorMessage.textContent = 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.';
+            errorBox.classList.remove('hidden');
+            return false;
+        }
+
+        return true;
+    }
+</script>
 @endsection

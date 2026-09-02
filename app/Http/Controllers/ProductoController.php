@@ -2,27 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductoController extends Controller
 {
     public function index()
     {
         $productos = Producto::with('categoria')->get();
+
         return view('productos.index', compact('productos'));
     }
 
     public function create()
     {
         $categorias = Categoria::all();
+
         return view('productos.create', compact('categorias'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'codigo_barra' => 'required|string|unique:productos,codigo_barra',
             'nombre' => [
                 'required',
@@ -39,6 +42,13 @@ class ProductoController extends Controller
             'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($validator)
+                ->with('validation_error', $validator->errors()->first());
+        }
+
         Producto::create($request->all());
 
         return redirect()->route('productos.index')->with('success', 'Producto creado con éxito.');
@@ -48,6 +58,7 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
         $categorias = Categoria::all();
+
         return view('productos.edit', compact('producto', 'categorias'));
     }
 
@@ -55,8 +66,8 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
 
-        $request->validate([
-            'codigo_barra' => 'required|string|unique:productos,codigo_barra,' . $id . ',id_producto',
+        $validator = Validator::make($request->all(), [
+            'codigo_barra' => 'required|string|unique:productos,codigo_barra,'.$id.',id_producto',
             'nombre' => [
                 'required',
                 'string',
@@ -71,6 +82,13 @@ class ProductoController extends Controller
         ], [
             'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($validator)
+                ->with('validation_error', $validator->errors()->first());
+        }
 
         $producto->update($request->all());
 
