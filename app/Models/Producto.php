@@ -10,16 +10,22 @@ class Producto extends Model
     use HasFactory;
 
     protected $table = 'productos';
+
     protected $primaryKey = 'id_producto';
 
     protected $fillable = [
         'codigo_barra',
+        'codigo_origen',
         'nombre',
         'descripcion',
         'precio',
         'stock',
         'stock_critico',
-        'id_categoria'
+        'id_categoria',
+        'ubicacion',
+        'unidad',
+        'fila_origen',
+        'estado_importacion',
     ];
 
     public function categoria()

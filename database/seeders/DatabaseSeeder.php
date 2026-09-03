@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             ClienteSeeder::class,
             ProductoSeeder::class,
+            $this->call(ProductoRealSeeder::class),
         ]);
     }
 }
