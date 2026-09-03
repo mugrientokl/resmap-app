@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RESMAP - Sistema de Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        nav[role="navigation"] a,
+        nav[role="navigation"] span {
+            border-color: #e8c8c3 !important;
+            color: #9f2f25 !important;
+            background-color: #fff !important;
+        }
+
+        nav[role="navigation"] a:hover {
+            background-color: #f7e8e6 !important;
+            color: #8f241d !important;
+        }
+
+        nav[role="navigation"] span[aria-current="page"] span {
+            background-color: #b52f25 !important;
+            border-color: #b52f25 !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 <body class="bg-[#f7f3f0] font-sans antialiased text-[#241817]">
     <nav class="bg-[#8f241d] text-white shadow-lg">
@@ -14,6 +33,12 @@
                 <div class="flex items-center gap-4 text-sm">
                     <a href="{{ route('productos.index') }}" class="hover:text-[#ffd5c9]">Inventario</a>
                     <a href="{{ route('pos.index') }}" class="hover:text-[#ffd5c9]">POS</a>
+                    <a href="{{ route('solicitudes.index') }}" class="hover:text-[#ffd5c9]">Solicitudes</a>
+                    @if(auth()->user()->rol === 'Administrador')
+                        <a href="{{ route('reportes.index') }}" class="hover:text-[#ffd5c9]">Reportes</a>
+                        <a href="{{ route('reportes.auditoria') }}" class="hover:text-[#ffd5c9]">Auditoría</a>
+                        <a href="{{ route('backups.index') }}" class="hover:text-[#ffd5c9]">Backups</a>
+                    @endif
                     @if(auth()->user()->rol === 'Administrador')
                         <a href="{{ route('categorias.index') }}" class="hover:text-[#ffd5c9]">Categorías</a>
                         <a href="{{ route('clientes.index') }}" class="hover:text-[#ffd5c9]">Clientes</a>
@@ -23,7 +48,7 @@
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="text-red-300 hover:text-red-100">Salir</button></form>
                 </div>
             @else
-                <a href="{{ route('login') }}" class="text-sm hover:text-blue-300">Acceso interno</a>
+                <a href="{{ route('login') }}" class="text-sm hover:text-[#ffd5c9]">Acceso interno</a>
             @endauth
         </div>
     </nav>

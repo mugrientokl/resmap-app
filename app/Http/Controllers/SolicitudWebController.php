@@ -8,9 +8,15 @@ use Illuminate\Http\Request;
 
 class SolicitudWebController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $solicitudes = SolicitudWeb::with('cliente')->latest('fecha')->paginate(20);
+        $solicitudes = SolicitudWeb::with('cliente')
+            ->when($request->filled('estado'), fn ($query) => $query->where('estado', $request->string('estado')->toString()))
+            ->when($request->filled('desde'), fn ($query) => $query->whereDate('fecha', '>=', $request->date('desde')))
+            ->when($request->filled('hasta'), fn ($query) => $query->whereDate('fecha', '<=', $request->date('hasta')))
+            ->latest('fecha')
+            ->paginate(20)
+            ->withQueryString();
 
         return request()->expectsJson()
             ? response()->json($solicitudes)

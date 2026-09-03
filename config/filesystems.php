@@ -2,6 +2,8 @@
 
 return [
 
+    'backup_keep' => (int) env('BACKUP_KEEP', 14),
+
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk

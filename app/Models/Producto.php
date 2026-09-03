@@ -38,4 +38,9 @@ class Producto extends Model
     {
         return $this->hasMany(DetalleVenta::class, 'id_producto', 'id_producto');
     }
+
+    public function movimientosInventario()
+    {
+        return $this->hasMany(InventarioMovimiento::class, 'id_producto', 'id_producto');
+    }
 }

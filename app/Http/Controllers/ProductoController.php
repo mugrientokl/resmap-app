@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\InventarioMovimiento;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductoController extends Controller
 {
@@ -29,6 +31,26 @@ class ProductoController extends Controller
             ->withQueryString();
 
         return view('productos.index', compact('productos', 'categorias'));
+    }
+
+    public function exportarExcel()
+    {
+        $productos = Producto::with('categoria')->orderBy('nombre')->get();
+
+        return response()->streamDownload(function () use ($productos): void {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['Código de barra', 'Código origen', 'Nombre', 'Categoría', 'Precio', 'Stock', 'Stock crítico', 'Ubicación', 'Unidad'], ';');
+            foreach ($productos as $producto) {
+                fputcsv($handle, [$producto->codigo_barra, $producto->codigo_origen, $producto->nombre, $producto->categoria?->nombre_categoria, $producto->precio, $producto->stock, $producto->stock_critico, $producto->ubicacion, $producto->unidad], ';');
+            }
+            fclose($handle);
+        }, 'inventario-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function exportarPdf()
+    {
+        return Pdf::loadView('productos.export-pdf', ['productos' => Producto::with('categoria')->orderBy('nombre')->get()])->download('inventario-'.now()->format('Y-m-d').'.pdf');
     }
 
     public function buscarPorCodigo(Request $request)
@@ -100,7 +122,16 @@ class ProductoController extends Controller
         if ($request->hasFile('imagen')) {
             $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
-        Producto::create($datos);
+        $producto = Producto::create($datos);
+        InventarioMovimiento::create([
+            'id_producto' => $producto->id_producto,
+            'user_id' => $request->user()->id,
+            'tipo' => 'ingreso',
+            'cantidad' => $producto->stock,
+            'stock_anterior' => 0,
+            'stock_nuevo' => $producto->stock,
+            'motivo' => 'Producto creado',
+        ]);
 
         return redirect()->route('productos.index')->with('success', 'Producto creado con éxito.');
     }
@@ -146,7 +177,19 @@ class ProductoController extends Controller
         if ($request->hasFile('imagen')) {
             $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
+        $stockAnterior = $producto->stock;
         $producto->update($datos);
+        if ($stockAnterior !== $producto->stock) {
+            InventarioMovimiento::create([
+                'id_producto' => $producto->id_producto,
+                'user_id' => $request->user()->id,
+                'tipo' => 'ajuste',
+                'cantidad' => $producto->stock - $stockAnterior,
+                'stock_anterior' => $stockAnterior,
+                'stock_nuevo' => $producto->stock,
+                'motivo' => 'Stock editado desde producto',
+            ]);
+        }
 
         return redirect()->route('productos.index')->with('success', 'Producto actualizado con éxito.');
     }

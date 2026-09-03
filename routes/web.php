@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DetalleVentaController;
+use App\Http\Controllers\InventarioMovimientoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\SolicitudWebController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
@@ -34,6 +37,10 @@ Route::middleware([
     Route::post('/catalogo/solicitudes', [CatalogoController::class, 'storeRequest'])->middleware('throttle:10,1')->name('catalogo.solicitudes.store');
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
+    Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/password/email', [AuthController::class, 'sendResetLink'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
     Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->middleware('auth')->name('notificaciones.index');
     Route::post('/notificaciones/{id}/leer', [NotificacionController::class, 'read'])->middleware('auth')->name('notificaciones.read');
@@ -48,6 +55,8 @@ Route::middleware([
 
     // Rutas para Productos (Inventario de repuestos)
     Route::get('/productos', [ProductoController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.index');
+    Route::get('/productos/exportar/excel', [ProductoController::class, 'exportarExcel'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.exportar.excel');
+    Route::get('/productos/exportar/pdf', [ProductoController::class, 'exportarPdf'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.exportar.pdf');
     Route::get('/pos/producto-por-codigo', [ProductoController::class, 'buscarPorCodigo'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('pos.producto.codigo');
     Route::get('/productos/{id}/etiqueta', [ProductoController::class, 'etiqueta'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.etiqueta');
     Route::get('/productos/crear', [ProductoController::class, 'create'])->middleware(['auth', 'role:Administrador'])->name('productos.create');
@@ -84,6 +93,13 @@ Route::middleware([
         return view('pos.index', compact('productos', 'categorias'));
     })->middleware(['auth', 'role:Administrador,Vendedor'])->name('pos.index');
     Route::post('/ventas', [VentaController::class, 'store'])->middleware(['auth', 'role:Administrador,Vendedor', 'throttle:30,1']);
+    Route::get('/inventario/movimientos', [InventarioMovimientoController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('inventario.movimientos');
+    Route::post('/inventario/movimientos', [InventarioMovimientoController::class, 'store'])->middleware(['auth', 'role:Administrador'])->name('inventario.movimientos.store');
+    Route::get('/reportes', [ReporteController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('reportes.index');
+    Route::get('/reportes/exportar/{formato}', [ReporteController::class, 'exportar'])->middleware(['auth', 'role:Administrador'])->name('reportes.exportar');
+    Route::get('/auditoria', [ReporteController::class, 'auditoria'])->middleware(['auth', 'role:Administrador'])->name('reportes.auditoria');
+    Route::get('/backups', [BackupController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('backups.index');
+    Route::get('/backups/{filename}', [BackupController::class, 'download'])->middleware(['auth', 'role:Administrador'])->name('backups.download');
 
     // Rutas para Detalles de Venta
     Route::get('/detalle-ventas', [DetalleVentaController::class, 'index'])->middleware(['auth', 'role:Administrador']);

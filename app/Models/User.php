@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,10 +14,10 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['username', 'name', 'email', 'password', 'rol'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements CanResetPasswordContract
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use CanResetPassword, HasFactory, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -33,5 +35,10 @@ class User extends Authenticatable
     public function ventas()
     {
         return $this->hasMany(Venta::class, 'user_id', 'id');
+    }
+
+    public function movimientosInventario()
+    {
+        return $this->hasMany(InventarioMovimiento::class, 'user_id');
     }
 }

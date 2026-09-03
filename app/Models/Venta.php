@@ -10,6 +10,7 @@ class Venta extends Model
     use HasFactory;
 
     protected $table = 'ventas';
+
     protected $primaryKey = 'id_venta';
 
     protected $fillable = [
@@ -22,8 +23,15 @@ class Venta extends Model
         'medio_pago',
         'estado_sii',
         'user_id',
-        'id_cliente'
+        'id_cliente',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'fecha' => 'datetime',
+        ];
+    }
 
     public function user()
     {

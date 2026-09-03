@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Rules\RutChileno;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
@@ -26,7 +27,7 @@ class ClienteController extends Controller
         $cliente = Cliente::findOrFail($id);
 
         $request->validate([
-            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/', 'unique:clientes,rut,'.$id.',id_cliente'],
+            'rut' => ['required', 'string', 'max:20', new RutChileno, 'unique:clientes,rut,'.$id.',id_cliente'],
             'nombre' => 'required|string|max:255',
             'correo' => 'nullable|email|max:255',
             'telefono' => 'nullable|string|max:50',

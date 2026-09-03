@@ -77,7 +77,7 @@
                 <div>
                     <label for="nombre_categoria" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</label>
                     <input type="text" id="nombre_categoria" name="nombre_categoria" value="{{ old('nombre_categoria') }}" 
-                        class="w-full px-3 py-2 border @if($errors->has('nombre_categoria') && old('form_type') != 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border @if($errors->has('nombre_categoria') && old('form_type') != 'edit') border-red-500 @else border-gray-300 @enderror rounded-md focus:outline-none focus:ring-2 focus:ring-[#b52f25]">
                     
                     @if($errors->has('nombre_categoria') && old('form_type') != 'edit')
                         <p class="text-red-500 text-xs mt-1">{{ $errors->first('nombre_categoria') }}</p>
@@ -87,7 +87,7 @@
                 <div>
                     <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción (Opcional)</label>
                     <textarea id="descripcion" name="descripcion" rows="3" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('descripcion') }}</textarea>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#b52f25]">{{ old('descripcion') }}</textarea>
                 </div>
             </div>
 

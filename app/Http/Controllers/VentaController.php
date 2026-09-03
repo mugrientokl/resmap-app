@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use App\Models\DetalleVenta;
+use App\Models\InventarioMovimiento;
 use App\Models\Producto;
 use App\Models\User;
 use App\Models\Venta;
 use App\Notifications\ProductoStockCritico;
+use App\Rules\RutChileno;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +23,7 @@ class VentaController extends Controller
             'tipo_documento' => 'required|string|in:Boleta Electrónica,Factura Electrónica',
             'medio_pago' => 'required|string|in:Efectivo,Transferencia,Tarjeta',
             // Datos del cliente para búsqueda o creación automática por RUT
-            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/'],
+            'rut' => ['required', 'string', 'max:20', new RutChileno],
             'nombre_cliente' => 'required|string|max:255',
             'correo_cliente' => 'nullable|email|max:255',
             'telefono_cliente' => 'nullable|string|max:50',
@@ -107,7 +109,18 @@ class VentaController extends Controller
                     ]);
 
                     // Descontar stock
+                    $stockAnterior = $det['producto']->stock;
                     $det['producto']->decrement('stock', $det['cantidad']);
+                    InventarioMovimiento::create([
+                        'id_producto' => $det['producto']->id_producto,
+                        'user_id' => $request->user()->id,
+                        'tipo' => 'venta',
+                        'cantidad' => -$det['cantidad'],
+                        'stock_anterior' => $stockAnterior,
+                        'stock_nuevo' => $stockAnterior - $det['cantidad'],
+                        'motivo' => 'Venta registrada',
+                        'id_venta' => $venta->id_venta,
+                    ]);
                 }
 
                 return [

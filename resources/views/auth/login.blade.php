@@ -10,6 +10,7 @@
                 <div><label for="login" class="block text-sm font-bold">Usuario o correo</label><input id="login" name="login" value="{{ old('login') }}" required autofocus class="mt-2 w-full border border-gray-300 p-3 outline-none focus:border-[#23635f]"></div>
                 <div><label for="password" class="block text-sm font-bold">Contraseña</label><input id="password" type="password" name="password" required class="mt-2 w-full border border-gray-300 p-3 outline-none focus:border-[#23635f]"></div>
                 <button class="w-full bg-[#b52f25] p-3 font-bold text-white transition hover:bg-[#8f241d]">Ingresar</button>
+                <a href="{{ route('password.request') }}" class="block text-center text-sm font-bold text-[#23635f]">¿Olvidaste tu contraseña?</a>
             </form>
         </div>
     </main>

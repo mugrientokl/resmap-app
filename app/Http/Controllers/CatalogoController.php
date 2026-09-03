@@ -8,6 +8,7 @@ use App\Models\Producto;
 use App\Models\SolicitudWeb;
 use App\Models\User;
 use App\Notifications\SolicitudWebRecibida;
+use App\Rules\RutChileno;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +36,7 @@ class CatalogoController extends Controller
     public function storeRequest(Request $request)
     {
         $data = $request->validate([
-            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/'],
+            'rut' => ['required', 'string', 'max:20', new RutChileno],
             'nombre' => ['required', 'string', 'max:255'],
             'correo' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:50'],

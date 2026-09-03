@@ -4,9 +4,14 @@
 <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Inventario de Repuestos y Maquinaria</h2>
-        @if(auth()->user()->rol === 'Administrador')
-            <a href="{{ route('productos.create') }}" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d] font-medium">+ Nuevo Repuesto</a>
-        @endif
+        <div class="flex flex-wrap gap-2">
+            @if(auth()->user()->rol === 'Administrador')
+                <a href="{{ route('inventario.movimientos') }}" class="rounded-md border border-[#b52f25] px-4 py-2 font-medium text-[#9f2f25] hover:bg-[#f7e8e6]">Historial de movimientos</a>
+                <a href="{{ route('productos.create') }}" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d] font-medium">+ Nuevo Repuesto</a>
+            @endif
+            <a href="{{ route('productos.exportar.excel') }}" class="rounded-md border border-[#b52f25] px-4 py-2 font-medium text-[#9f2f25] hover:bg-[#f7e8e6]">Excel</a>
+            <a href="{{ route('productos.exportar.pdf') }}" class="rounded-md bg-[#b52f25] px-4 py-2 font-medium text-white hover:bg-[#8f241d]">PDF</a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -24,8 +29,8 @@
             @endforeach
         </select>
         <div class="flex gap-2">
-            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700">Filtrar</button>
-            <a href="{{ route('productos.index') }}" class="border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50">Limpiar</a>
+            <button type="submit" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d]">Filtrar</button>
+            <a href="{{ route('productos.index') }}" class="border border-[#d9aaa3] text-[#9f2f25] px-4 py-2 rounded-md hover:bg-[#f7e8e6]">Limpiar</a>
         </div>
     </form>
 
