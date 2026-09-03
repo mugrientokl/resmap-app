@@ -26,14 +26,14 @@ class ClienteController extends Controller
         $cliente = Cliente::findOrFail($id);
 
         $request->validate([
-            'rut' => 'required|string|max:20|unique:clientes,rut,'.$id.',id_cliente',
+            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/', 'unique:clientes,rut,'.$id.',id_cliente'],
             'nombre' => 'required|string|max:255',
             'correo' => 'nullable|email|max:255',
             'telefono' => 'nullable|string|max:50',
             'direccion' => 'nullable|string|max:255',
         ]);
 
-        $cliente->update($request->all());
+        $cliente->update($request->only(['rut', 'nombre', 'correo', 'telefono', 'direccion']));
 
         return redirect()->route('clientes.index')->with('success', 'Cliente actualizado con éxito.');
     }

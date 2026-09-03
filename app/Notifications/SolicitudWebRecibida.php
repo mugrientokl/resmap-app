@@ -22,7 +22,7 @@ class SolicitudWebRecibida extends Notification
         return [
             'tipo' => 'solicitud', 'titulo' => 'Nueva solicitud web',
             'mensaje' => 'Solicitud #'.$this->solicitud->id_solicitud.' de '.$this->solicitud->cliente->nombre,
-            'url' => route('solicitudes.index'),
+            'url' => route('solicitudes.show', $this->solicitud->id_solicitud),
         ];
     }
 }

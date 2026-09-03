@@ -43,7 +43,7 @@
                         <td class="px-4 py-2 text-sm text-gray-900">$ {{ number_format($prod->precio, 0, ',', '.') }}</td>
                         <td class="px-4 py-2 text-sm text-gray-500">{{ $prod->stock }}</td>
                         <td class="px-4 py-2 text-center text-sm">
-                            <button type="button" onclick="agregarAlCarro({{ $prod->id_producto }}, '{{ addslashes($prod->nombre) }}', {{ $prod->precio }}, {{ $prod->stock }})" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs">Agregar</button>
+                            <button type="button" onclick="agregarAlCarro({{ $prod->id_producto }}, '{{ addslashes($prod->nombre) }}', {{ $prod->precio }}, {{ $prod->stock }})" class="bg-[#b52f25] text-white px-3 py-1 rounded hover:bg-[#8f241d] text-xs">Agregar</button>
                         </td>
                     </tr>
                     @endforeach
@@ -139,7 +139,7 @@
                 </div>
             </div>
 
-            <button type="button" onclick="procesarVenta()" class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 font-bold text-center block">
+            <button type="button" onclick="procesarVenta()" class="w-full bg-[#8f241d] text-white py-2 rounded-md hover:bg-[#721d18] font-bold text-center block">
                 Emitir Documento SII
             </button>
         </div>

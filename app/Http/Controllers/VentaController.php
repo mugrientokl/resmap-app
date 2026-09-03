@@ -18,10 +18,10 @@ class VentaController extends Controller
     {
         // Validación de datos entrantes incluyendo los campos del cliente
         $request->validate([
-            'tipo_documento' => 'required|string', // 'Boleta Electrónica' (39) o 'Factura Electrónica' (33)
-            'medio_pago' => 'required|string',
+            'tipo_documento' => 'required|string|in:Boleta Electrónica,Factura Electrónica',
+            'medio_pago' => 'required|string|in:Efectivo,Transferencia,Tarjeta',
             // Datos del cliente para búsqueda o creación automática por RUT
-            'rut' => 'required|string',
+            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/'],
             'nombre_cliente' => 'required|string|max:255',
             'correo_cliente' => 'nullable|email|max:255',
             'telefono_cliente' => 'nullable|string|max:50',
@@ -29,7 +29,7 @@ class VentaController extends Controller
             // Detalles de los repuestos
             'detalles' => 'required|array|min:1',
             'detalles.*.id_producto' => 'required|exists:productos,id_producto',
-            'detalles.*.cantidad' => 'required|integer|min:1',
+            'detalles.*.cantidad' => 'required|integer|min:1|max:2147483647',
         ]);
 
         try {

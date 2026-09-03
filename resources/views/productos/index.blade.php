@@ -5,7 +5,7 @@
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Inventario de Repuestos y Maquinaria</h2>
         @if(auth()->user()->rol === 'Administrador')
-            <a href="{{ route('productos.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Nuevo Repuesto</a>
+            <a href="{{ route('productos.create') }}" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d] font-medium">+ Nuevo Repuesto</a>
         @endif
     </div>
 
@@ -44,7 +44,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($productos as $producto)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{{ $producto->codigo_barra }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{{ $producto->codigo_origen ?: $producto->codigo_barra }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $producto->nombre }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $producto->categoria->nombre_categoria ?? 'Sin Categoría' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$ {{ number_format($producto->precio, 0, ',', '.') }}</td>
@@ -61,7 +61,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                         @if(auth()->user()->rol === 'Administrador')
-                            <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                            <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-[#9f2f25] hover:text-[#721d18]">Editar</a>
                             <form action="{{ route('productos.destroy', $producto->id_producto, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
                                 @csrf
                                 @method('DELETE')

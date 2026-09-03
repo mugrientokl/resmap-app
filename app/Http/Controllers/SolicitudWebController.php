@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Producto;
 use App\Models\SolicitudWeb;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,19 @@ class SolicitudWebController extends Controller
         return request()->expectsJson()
             ? response()->json($solicitudes)
             : view('solicitudes.index', compact('solicitudes'));
+    }
+
+    public function show($id)
+    {
+        $solicitud = SolicitudWeb::with('cliente')->findOrFail($id);
+        $productos = collect($solicitud->detalles_productos)->map(function (array $detalle) {
+            return [
+                'producto' => Producto::find($detalle['id_producto']),
+                'cantidad' => $detalle['cantidad'],
+            ];
+        });
+
+        return view('solicitudes.show', compact('solicitud', 'productos'));
     }
 
     public function store(Request $request)
@@ -39,11 +53,20 @@ class SolicitudWebController extends Controller
     public function actualizarEstado(Request $request, $id)
     {
         $request->validate([
-            'estado' => 'required|string|in:Pendiente,Aprobado,Rechazado',
+            'estado' => 'required|string|in:Pendiente,Pendiente de pago,Pagado,Entregado,Rechazado',
+            'observaciones' => 'nullable|string|max:2000',
         ]);
 
         $solicitud = SolicitudWeb::findOrFail($id);
-        $solicitud->update(['estado' => $request->estado]);
+        $solicitud->update([
+            'estado' => $request->estado,
+            'observaciones' => $request->observaciones,
+            'atendida_at' => $request->estado === 'Entregado' ? now() : $solicitud->atendida_at,
+        ]);
+
+        if (! $request->expectsJson()) {
+            return redirect()->route('solicitudes.show', $solicitud)->with('success', 'Estado de la solicitud actualizado.');
+        }
 
         return response()->json([
             'message' => 'Estado de la solicitud actualizado.',

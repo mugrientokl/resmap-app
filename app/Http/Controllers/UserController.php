@@ -16,10 +16,10 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|unique:users,username',
+            'username' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', 'unique:users,username'],
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8|max:255',
             'rol' => 'required|in:Administrador,Vendedor',
         ]);
 
@@ -33,7 +33,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Usuario creado con éxito.',
-            'user' => $user
+            'user' => $user,
         ], 201);
     }
 }

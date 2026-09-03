@@ -18,6 +18,7 @@ class Producto extends Model
         'codigo_origen',
         'nombre',
         'descripcion',
+        'imagen',
         'precio',
         'stock',
         'stock_critico',

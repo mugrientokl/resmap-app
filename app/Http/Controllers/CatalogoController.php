@@ -35,14 +35,14 @@ class CatalogoController extends Controller
     public function storeRequest(Request $request)
     {
         $data = $request->validate([
-            'rut' => ['required', 'string', 'max:20'],
+            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9Kk.\- ]+$/'],
             'nombre' => ['required', 'string', 'max:255'],
             'correo' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:50'],
             'direccion' => ['nullable', 'string', 'max:255'],
             'detalles_productos' => ['required', 'array', 'min:1'],
             'detalles_productos.*.id_producto' => ['required', 'exists:productos,id_producto'],
-            'detalles_productos.*.cantidad' => ['required', 'integer', 'min:1'],
+            'detalles_productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:2147483647'],
         ]);
 
         $solicitud = DB::transaction(function () use ($data): SolicitudWeb {

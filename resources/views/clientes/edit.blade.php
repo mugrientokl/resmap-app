@@ -36,7 +36,7 @@
 
         <div class="flex justify-end space-x-3 pt-4">
             <a href="{{ route('clientes.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Cancelar</a>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Guardar Cambios</button>
+            <button type="submit" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d]">Guardar Cambios</button>
         </div>
     </form>
 </div>

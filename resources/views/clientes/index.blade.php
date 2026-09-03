@@ -33,7 +33,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cliente->telefono ?? 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cliente->direccion ?? 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <a href="{{ route('clientes.edit', $cliente->id_cliente) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                        <a href="{{ route('clientes.edit', $cliente->id_cliente) }}" class="text-[#9f2f25] hover:text-[#721d18]">Editar</a>
                         <form action="{{ route('clientes.destroy', $cliente->id_cliente) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar este cliente?');">
                             @csrf
                             @method('DELETE')

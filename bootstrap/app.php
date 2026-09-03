@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\NoStoreMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->appendToGroup('web', InjectBoost::class);
+        $middleware->appendToGroup('web', [InjectBoost::class, NoStoreMiddleware::class]);
         $middleware->alias(['role' => RoleMiddleware::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

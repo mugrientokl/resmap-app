@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <form action="{{ route('productos.update', $producto->id_producto, absolute: false) }}" method="POST" class="space-y-4" onsubmit="return validateProductForm(this)">
+    <form action="{{ route('productos.update', $producto->id_producto, absolute: false) }}" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="return validateProductForm(this)">
         @csrf
         @method('PUT')
 
@@ -52,6 +52,12 @@
             <textarea name="descripcion" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">{{ old('descripcion', $producto->descripcion) }}</textarea>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Imagen del producto (opcional)</label>
+            <input type="file" name="imagen" accept="image/*" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            @if($producto->imagen)<img src="{{ asset('storage/'.$producto->imagen) }}" alt="{{ $producto->nombre }}" class="mt-3 h-24 w-24 object-cover">@endif
+        </div>
+
         <div class="grid grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Precio</label>
@@ -69,7 +75,7 @@
 
         <div class="flex justify-end space-x-3 pt-4">
             <a href="{{ route('productos.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Cancelar</a>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Actualizar Producto</button>
+            <button type="submit" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d]">Actualizar Producto</button>
         </div>
     </form>
 </div>

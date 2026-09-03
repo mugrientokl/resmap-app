@@ -10,17 +10,22 @@ class SolicitudWeb extends Model
     use HasFactory;
 
     protected $table = 'solicitud_webs';
+
     protected $primaryKey = 'id_solicitud';
 
     protected $fillable = [
         'fecha',
         'estado',
         'id_cliente',
-        'detalles_productos'
+        'detalles_productos',
+        'observaciones',
+        'atendida_at',
     ];
 
     protected $casts = [
+        'fecha' => 'datetime',
         'detalles_productos' => 'array',
+        'atendida_at' => 'datetime',
     ];
 
     public function cliente()

@@ -31,9 +31,9 @@ Route::middleware([
 ])->group(function (): void {
     Route::get('/', [CatalogoController::class, 'home'])->name('home');
     Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
-    Route::post('/catalogo/solicitudes', [CatalogoController::class, 'storeRequest'])->name('catalogo.solicitudes.store');
+    Route::post('/catalogo/solicitudes', [CatalogoController::class, 'storeRequest'])->middleware('throttle:10,1')->name('catalogo.solicitudes.store');
     Route::get('/login', [AuthController::class, 'create'])->name('login');
-    Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
     Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->middleware('auth')->name('notificaciones.index');
     Route::post('/notificaciones/{id}/leer', [NotificacionController::class, 'read'])->middleware('auth')->name('notificaciones.read');
@@ -81,7 +81,7 @@ Route::middleware([
 
         return view('pos.index', compact('productos', 'categorias'));
     })->middleware(['auth', 'role:Administrador,Vendedor'])->name('pos.index');
-    Route::post('/ventas', [VentaController::class, 'store'])->middleware(['auth', 'role:Administrador,Vendedor']);
+    Route::post('/ventas', [VentaController::class, 'store'])->middleware(['auth', 'role:Administrador,Vendedor', 'throttle:30,1']);
 
     // Rutas para Detalles de Venta
     Route::get('/detalle-ventas', [DetalleVentaController::class, 'index'])->middleware(['auth', 'role:Administrador']);
@@ -89,6 +89,7 @@ Route::middleware([
 
     // Rutas para Solicitudes Web (E-commerce / Carritos)
     Route::get('/solicitudes-web', [SolicitudWebController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.index');
+    Route::get('/solicitudes-web/{id}', [SolicitudWebController::class, 'show'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.show');
     Route::patch('/solicitudes-web/{id}/estado', [SolicitudWebController::class, 'actualizarEstado'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.estado');
 
     // Rutas para Usuarios

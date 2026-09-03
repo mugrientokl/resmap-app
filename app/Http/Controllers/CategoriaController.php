@@ -42,7 +42,7 @@ class CategoriaController extends Controller
                 ->with('validation_error', $validator->errors()->first());
         }
 
-        Categoria::create($request->all());
+        Categoria::create($request->only(['nombre_categoria', 'descripcion']));
 
         return redirect()->route('categorias.index')->with('success', 'Categoría creada con éxito.');
     }
@@ -78,7 +78,7 @@ class CategoriaController extends Controller
                 ->with('validation_error', $validator->errors()->first());
         }
 
-        $categoria->update($request->all());
+        $categoria->update($request->only(['nombre_categoria', 'descripcion']));
 
         return redirect()->route('categorias.index')->with('success', 'Categoría actualizada con éxito.');
     }

@@ -4,7 +4,7 @@
 <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Categorías de Repuestos</h2>
-        <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Nueva Categoría</button>
+        <button onclick="openCreateModal()" class="bg-[#b52f25] text-white px-4 py-2 rounded-md hover:bg-[#8f241d] font-medium">+ Nueva Categoría</button>
     </div>
 
     @if(session('success'))
@@ -38,7 +38,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cat->descripcion ?? 'Sin descripción' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                         <button onclick="openEditModal('{{ $cat->id_categoria }}', '{{ addslashes($cat->nombre_categoria) }}', '{{ addslashes($cat->descripcion ?? '') }}')" 
-                            class="text-indigo-600 hover:text-indigo-900">Editar</button>
+                            class="text-[#9f2f25] hover:text-[#721d18]">Editar</button>
                         
                         <form action="{{ route('categorias.destroy', $cat->id_categoria, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar esta categoría?');">
                             @csrf
@@ -93,7 +93,7 @@
 
             <div class="px-6 py-3 bg-gray-50 flex justify-end space-x-2">
                 <button type="button" onclick="closeCreateModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm font-medium">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">Guardar</button>
+                <button type="submit" class="px-4 py-2 bg-[#b52f25] text-white rounded-md hover:bg-[#8f241d] text-sm font-medium">Guardar</button>
             </div>
         </form>
     </div>
@@ -140,7 +140,7 @@
 
             <div class="px-6 py-3 bg-gray-50 flex justify-end space-x-2">
                 <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm font-medium">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">Actualizar</button>
+                <button type="submit" class="px-4 py-2 bg-[#b52f25] text-white rounded-md hover:bg-[#8f241d] text-sm font-medium">Actualizar</button>
             </div>
         </form>
     </div>

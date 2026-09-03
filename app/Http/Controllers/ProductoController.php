@@ -41,7 +41,7 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'codigo_barra' => 'required|string|unique:productos,codigo_barra',
+            'codigo_barra' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._\/-]+$/', 'unique:productos,codigo_barra'],
             'nombre' => [
                 'required',
                 'string',
@@ -49,10 +49,11 @@ class ProductoController extends Controller
                 'not_regex:/^\d+$/',
             ],
             'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'stock_critico' => 'required|integer|min:0',
+            'precio' => 'required|numeric|min:0|max:99999999.99',
+            'stock' => 'required|integer|min:0|max:2147483647',
+            'stock_critico' => 'required|integer|min:0|max:2147483647',
             'id_categoria' => 'required|exists:categorias,id_categoria',
+            'imagen' => 'nullable|image|max:4096',
         ], [
             'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
@@ -64,7 +65,11 @@ class ProductoController extends Controller
                 ->with('validation_error', $validator->errors()->first());
         }
 
-        Producto::create($request->all());
+        $datos = $request->except('imagen');
+        if ($request->hasFile('imagen')) {
+            $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+        Producto::create($datos);
 
         return redirect()->route('productos.index')->with('success', 'Producto creado con éxito.');
     }
@@ -82,7 +87,7 @@ class ProductoController extends Controller
         $producto = Producto::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'codigo_barra' => 'required|string|unique:productos,codigo_barra,'.$id.',id_producto',
+            'codigo_barra' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._\/-]+$/', 'unique:productos,codigo_barra,'.$id.',id_producto'],
             'nombre' => [
                 'required',
                 'string',
@@ -90,10 +95,11 @@ class ProductoController extends Controller
                 'not_regex:/^\d+$/',
             ],
             'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'stock_critico' => 'required|integer|min:0',
+            'precio' => 'required|numeric|min:0|max:99999999.99',
+            'stock' => 'required|integer|min:0|max:2147483647',
+            'stock_critico' => 'required|integer|min:0|max:2147483647',
             'id_categoria' => 'required|exists:categorias,id_categoria',
+            'imagen' => 'nullable|image|max:4096',
         ], [
             'nombre.not_regex' => 'El nombre del repuesto no puede contener únicamente números; debe incluir al menos una letra.',
         ]);
@@ -105,7 +111,11 @@ class ProductoController extends Controller
                 ->with('validation_error', $validator->errors()->first());
         }
 
-        $producto->update($request->all());
+        $datos = $request->except('imagen');
+        if ($request->hasFile('imagen')) {
+            $datos['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+        $producto->update($datos);
 
         return redirect()->route('productos.index')->with('success', 'Producto actualizado con éxito.');
     }
