@@ -67,9 +67,8 @@
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
                             </form>
-                        @else
-                            <span class="text-gray-400">Solo lectura</span>
                         @endif
+                        <a href="{{ route('productos.etiqueta', $producto->id_producto) }}" target="_blank" class="text-[#9f2f25] hover:text-[#721d18]">Etiqueta</a>
                     </td>
                 </tr>
                 @endforeach

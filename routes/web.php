@@ -48,6 +48,8 @@ Route::middleware([
 
     // Rutas para Productos (Inventario de repuestos)
     Route::get('/productos', [ProductoController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.index');
+    Route::get('/pos/producto-por-codigo', [ProductoController::class, 'buscarPorCodigo'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('pos.producto.codigo');
+    Route::get('/productos/{id}/etiqueta', [ProductoController::class, 'etiqueta'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.etiqueta');
     Route::get('/productos/crear', [ProductoController::class, 'create'])->middleware(['auth', 'role:Administrador'])->name('productos.create');
     Route::post('/productos', [ProductoController::class, 'store'])->middleware(['auth', 'role:Administrador'])->name('productos.store');
     Route::get('/productos/{id}/editar', [ProductoController::class, 'edit'])->middleware(['auth', 'role:Administrador'])->name('productos.edit');

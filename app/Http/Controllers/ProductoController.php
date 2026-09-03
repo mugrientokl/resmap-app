@@ -31,6 +31,37 @@ class ProductoController extends Controller
         return view('productos.index', compact('productos', 'categorias'));
     }
 
+    public function buscarPorCodigo(Request $request)
+    {
+        $codigo = $request->string('codigo')->trim()->toString();
+
+        if ($codigo === '') {
+            return response()->json(['message' => 'El código es obligatorio.'], 422);
+        }
+
+        $producto = Producto::where('codigo_barra', $codigo)
+            ->orWhere('codigo_origen', $codigo)
+            ->first();
+
+        if (! $producto) {
+            return response()->json(['message' => 'No se encontró un producto con ese código.'], 404);
+        }
+
+        return response()->json([
+            'id_producto' => $producto->id_producto,
+            'nombre' => $producto->nombre,
+            'precio' => (float) $producto->precio,
+            'stock' => $producto->stock,
+        ]);
+    }
+
+    public function etiqueta(int $id)
+    {
+        $producto = Producto::with('categoria')->findOrFail($id);
+
+        return view('productos.etiqueta', compact('producto'));
+    }
+
     public function create()
     {
         $categorias = Categoria::all();

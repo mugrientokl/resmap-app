@@ -5,6 +5,15 @@
     <!-- Panel Izquierdo: Selección de Productos -->
     <div class="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Punto de Venta (POS) - Repuestos</h2>
+
+        <div class="mb-4 rounded-md border border-[#e8c8c3] bg-[#fff7f5] p-3">
+            <label for="lector-codigo" class="block text-sm font-bold text-[#8f241d]">Escanear código</label>
+            <div class="mt-2 flex gap-2">
+                <input type="text" id="lector-codigo" autocomplete="off" placeholder="Apunta el lector y escanea" class="w-full rounded-md border-gray-300 p-2 shadow-sm">
+                <button type="button" onclick="buscarCodigo()" class="rounded-md bg-[#b52f25] px-4 py-2 text-sm font-bold text-white">Agregar</button>
+            </div>
+            <p id="lector-mensaje" class="mt-2 text-xs text-gray-500">El lector USB funciona como teclado. Pulsa Enter después de escanear.</p>
+        </div>
         
         <form method="GET" action="{{ url('/pos') }}" class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
             <input type="search" name="nombre" value="{{ request('nombre') }}" placeholder="Buscar por nombre o código" class="rounded-md border-gray-300 shadow-sm border p-2">
@@ -140,7 +149,7 @@
             </div>
 
             <button type="button" onclick="procesarVenta()" class="w-full bg-[#8f241d] text-white py-2 rounded-md hover:bg-[#721d18] font-bold text-center block">
-                Emitir Documento SII
+                Registrar venta e imprimir
             </button>
         </div>
     </div>
@@ -246,13 +255,57 @@
         .then(response => response.json().then(data => ({ status: response.status, body: data })))
         .then(res => {
             if (res.status === 201) {
-                alert('¡Venta emitida y cliente sincronizado con éxito!');
+                alert('¡Venta registrada y stock actualizado!');
                 window.location.reload();
             } else {
                 alert('Error: ' + (res.body.error || JSON.stringify(res.body.errors)));
             }
         })
         .catch(err => console.error('Error:', err));
+    }
+
+    const lectorCodigo = document.getElementById('lector-codigo');
+    lectorCodigo.focus();
+    lectorCodigo.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            buscarCodigo();
+        }
+    });
+
+    async function buscarCodigo() {
+        const input = document.getElementById('lector-codigo');
+        const mensaje = document.getElementById('lector-mensaje');
+        const codigo = input.value.trim();
+
+        if (!codigo) {
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ route('pos.producto.codigo') }}?codigo=' + encodeURIComponent(codigo), {
+                headers: { 'Accept': 'application/json' }
+            });
+            const producto = await response.json();
+
+            if (!response.ok) {
+                throw new Error(producto.message || 'No se encontró el producto.');
+            }
+
+            if (producto.stock <= 0) {
+                throw new Error('El producto no tiene stock disponible.');
+            }
+
+            agregarAlCarro(producto.id_producto, producto.nombre, producto.precio, producto.stock);
+            mensaje.textContent = 'Agregado: ' + producto.nombre;
+            mensaje.className = 'mt-2 text-xs text-green-700';
+            input.value = '';
+        } catch (error) {
+            mensaje.textContent = error.message;
+            mensaje.className = 'mt-2 text-xs text-red-700';
+        }
+
+        input.focus();
     }
 </script>
 @endsection
