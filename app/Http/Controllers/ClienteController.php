@@ -9,13 +9,15 @@ class ClienteController extends Controller
 {
     public function index()
     {
-        $clientes = Cliente::all();
+        $clientes = Cliente::orderBy('nombre')->paginate(20);
+
         return view('clientes.index', compact('clientes'));
     }
 
     public function edit($id)
     {
         $cliente = Cliente::findOrFail($id);
+
         return view('clientes.edit', compact('cliente'));
     }
 
@@ -24,7 +26,7 @@ class ClienteController extends Controller
         $cliente = Cliente::findOrFail($id);
 
         $request->validate([
-            'rut' => 'required|string|max:20|unique:clientes,rut,' . $id . ',id_cliente',
+            'rut' => 'required|string|max:20|unique:clientes,rut,'.$id.',id_cliente',
             'nombre' => 'required|string|max:255',
             'correo' => 'nullable|email|max:255',
             'telefono' => 'nullable|string|max:50',

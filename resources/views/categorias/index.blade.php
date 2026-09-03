@@ -51,6 +51,10 @@
             </tbody>
         </table>
     </div>
+
+    <div class="mt-6">
+        {{ $categorias->links() }}
+    </div>
 </div>
 
 <!-- MODAL CREAR CATEGORÍA -->

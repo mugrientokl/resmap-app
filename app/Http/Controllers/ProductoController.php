@@ -9,11 +9,26 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $productos = Producto::with('categoria')->get();
+        $categorias = Categoria::orderBy('nombre_categoria')->get();
+        $productos = Producto::with('categoria')
+            ->when($request->filled('nombre'), function ($query) use ($request): void {
+                $nombre = $request->string('nombre')->toString();
+                $query->where(function ($productQuery) use ($nombre): void {
+                    $productQuery->where('nombre', 'like', "%{$nombre}%")
+                        ->orWhere('codigo_barra', 'like', "%{$nombre}%")
+                        ->orWhere('codigo_origen', 'like', "%{$nombre}%");
+                });
+            })
+            ->when($request->filled('categoria'), function ($query) use ($request): void {
+                $query->where('id_categoria', $request->integer('categoria'));
+            })
+            ->orderBy('nombre')
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('productos.index', compact('productos'));
+        return view('productos.index', compact('productos', 'categorias'));
     }
 
     public function create()

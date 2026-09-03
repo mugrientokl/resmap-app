@@ -10,7 +10,8 @@ class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::all();
+        $categorias = Categoria::orderBy('nombre_categoria')->paginate(20);
+
         return view('categorias.index', compact('categorias'));
     }
 
@@ -49,6 +50,7 @@ class CategoriaController extends Controller
     public function edit($id)
     {
         $categoria = Categoria::findOrFail($id);
+
         return view('categorias.edit', compact('categoria'));
     }
 
@@ -61,7 +63,7 @@ class CategoriaController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:categorias,nombre_categoria,' . $id . ',id_categoria',
+                'unique:categorias,nombre_categoria,'.$id.',id_categoria',
                 'not_regex:/^\d+$/',
             ],
             'descripcion' => 'nullable|string',

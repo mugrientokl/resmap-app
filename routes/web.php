@@ -1,19 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\DetalleVentaController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\SolicitudWebController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VentaController;
+use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\ProductoController;
-use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\VentaController;
-use App\Http\Controllers\DetalleVentaController;
-use App\Http\Controllers\SolicitudWebController;
-use App\Http\Controllers\UserController;
 
 Route::middleware([
     EncryptCookies::class,
@@ -52,8 +55,25 @@ Route::middleware([
     Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
 
     // Rutas para Ventas / POS (Boletas y Facturas DTE)
-    Route::get('/pos', function () {
-        return view('pos.index');
+    Route::get('/pos', function (Request $request) {
+        $categorias = Categoria::orderBy('nombre_categoria')->get();
+        $productos = Producto::with('categoria')
+            ->when($request->filled('nombre'), function ($query) use ($request): void {
+                $nombre = $request->string('nombre')->toString();
+                $query->where(function ($productQuery) use ($nombre): void {
+                    $productQuery->where('nombre', 'like', "%{$nombre}%")
+                        ->orWhere('codigo_barra', 'like', "%{$nombre}%")
+                        ->orWhere('codigo_origen', 'like', "%{$nombre}%");
+                });
+            })
+            ->when($request->filled('categoria'), function ($query) use ($request): void {
+                $query->where('id_categoria', $request->integer('categoria'));
+            })
+            ->orderBy('nombre')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('pos.index', compact('productos', 'categorias'));
     });
     Route::post('/ventas', [VentaController::class, 'store']);
 

@@ -6,9 +6,22 @@
     <div class="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Punto de Venta (POS) - Repuestos</h2>
         
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Buscar Repuesto</label>
-            <input type="text" id="buscador-producto" placeholder="Escribe el nombre o código del repuesto..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2">
+        <form method="GET" action="{{ url('/pos') }}" class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input type="search" name="nombre" value="{{ request('nombre') }}" placeholder="Buscar por nombre o código" class="rounded-md border-gray-300 shadow-sm border p-2">
+            <select name="categoria" class="rounded-md border-gray-300 shadow-sm border p-2">
+                <option value="">Todas las categorías</option>
+                @foreach($categorias as $categoria)
+                    <option value="{{ $categoria->id_categoria }}" @selected(request('categoria') == $categoria->id_categoria)>{{ $categoria->nombre_categoria }}</option>
+                @endforeach
+            </select>
+            <div class="flex gap-2">
+                <button type="submit" class="bg-gray-800 text-white px-3 py-2 rounded-md hover:bg-gray-700">Filtrar</button>
+                <a href="{{ url('/pos') }}" class="border border-gray-300 px-3 py-2 rounded-md hover:bg-gray-50">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="mb-3 text-sm text-gray-500">
+            {{ $productos->total() }} productos encontrados
         </div>
 
         <div class="overflow-x-auto max-h-96 overflow-y-auto">
@@ -23,7 +36,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="tabla-productos">
-                    @foreach(\App\Models\Producto::all() as $prod)
+                    @foreach($productos as $prod)
                     <tr>
                         <td class="px-4 py-2 text-sm font-mono text-gray-600">{{ $prod->codigo_barra }}</td>
                         <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ $prod->nombre }}</td>
@@ -36,6 +49,10 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-4">
+            {{ $productos->links() }}
         </div>
     </div>
 

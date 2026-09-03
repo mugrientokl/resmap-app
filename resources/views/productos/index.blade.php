@@ -13,6 +13,20 @@
         </div>
     @endif
 
+    <form method="GET" action="{{ route('productos.index') }}" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input type="search" name="nombre" value="{{ request('nombre') }}" placeholder="Buscar por nombre o código" class="border-gray-300 rounded-md shadow-sm border p-2">
+        <select name="categoria" class="border-gray-300 rounded-md shadow-sm border p-2">
+            <option value="">Todas las categorías</option>
+            @foreach($categorias as $categoria)
+                <option value="{{ $categoria->id_categoria }}" @selected(request('categoria') == $categoria->id_categoria)>{{ $categoria->nombre_categoria }}</option>
+            @endforeach
+        </select>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700">Filtrar</button>
+            <a href="{{ route('productos.index') }}" class="border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50">Limpiar</a>
+        </div>
+    </form>
+
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -55,6 +69,10 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+
+    <div class="mt-6">
+        {{ $productos->links() }}
     </div>
 </div>
 @endsection
