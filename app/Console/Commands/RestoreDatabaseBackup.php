@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\Storage;
 #[Description('Restaura datos desde un backup JSON')]
 class RestoreDatabaseBackup extends Command
 {
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         if (! $this->option('force')) {
@@ -40,20 +37,20 @@ class RestoreDatabaseBackup extends Command
 
         $backup = json_decode($disk->get($path), true, 512, JSON_THROW_ON_ERROR);
         $tables = [
-            'resmap_db.users', 'resmap_db.categorias', 'resmap_db.clientes',
-            'resmap_db.productos', 'resmap_db.productos_importados', 'resmap_db.ventas',
-            'resmap_db.detalle_ventas', 'resmap_db.solicitud_webs', 'resmap_db.notifications',
+            'users', 'categorias', 'clientes', 'productos', 'productos_importados',
+            'ventas', 'detalle_ventas', 'solicitud_webs', 'notifications',
+            'inventario_movimientos', 'auditorias',
         ];
 
         DB::transaction(function () use ($backup, $tables): void {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
             foreach (array_reverse($tables) as $table) {
-                DB::table(str_replace('resmap_db.', '', $table))->delete();
+                DB::table($table)->delete();
             }
             foreach ($tables as $table) {
-                $rows = $backup[$table] ?? [];
+                $rows = $backup[$table] ?? $backup[config('database.connections.mysql.database').'.'.$table] ?? [];
                 foreach (array_chunk($rows, 250) as $chunk) {
-                    DB::table(str_replace('resmap_db.', '', $table))->insert($chunk);
+                    DB::table($table)->insert($chunk);
                 }
             }
             DB::statement('SET FOREIGN_KEY_CHECKS=1');

@@ -57,7 +57,6 @@
     </div>
 </div>
 
-<!-- MODAL CREAR CATEGORÍA -->
 <div id="createModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
         <form action="{{ route('categorias.store', absolute: false) }}" method="POST" onsubmit="return validateCategoryForm(this)">
@@ -99,7 +98,6 @@
     </div>
 </div>
 
-<!-- MODAL EDITAR CATEGORÍA -->
 <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
         <form id="editForm" method="POST" onsubmit="return validateCategoryForm(this)">
@@ -146,7 +144,6 @@
     </div>
 </div>
 
-<!-- Scripts de control -->
 <script>
     function openCreateModal() {
         document.getElementById('createModal').classList.remove('hidden');

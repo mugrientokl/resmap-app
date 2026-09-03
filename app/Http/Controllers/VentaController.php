@@ -12,33 +12,27 @@ use App\Notifications\ProductoStockCritico;
 use App\Rules\RutChileno;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class VentaController extends Controller
 {
-    // Registrar una nueva venta en el POS con sincronización automática de cliente por RUT
     public function store(Request $request)
     {
-        // Validación de datos entrantes incluyendo los campos del cliente
         $request->validate([
             'tipo_documento' => 'required|string|in:Boleta Electrónica,Factura Electrónica',
             'medio_pago' => 'required|string|in:Efectivo,Transferencia,Tarjeta',
-            // Datos del cliente para búsqueda o creación automática por RUT
             'rut' => ['required', 'string', 'max:20', new RutChileno],
             'nombre_cliente' => 'required|string|max:255',
             'correo_cliente' => 'nullable|email|max:255',
             'telefono_cliente' => 'nullable|string|max:50',
             'direccion_cliente' => 'nullable|string|max:255',
-            // Detalles de los repuestos
             'detalles' => 'required|array|min:1',
             'detalles.*.id_producto' => 'required|exists:productos,id_producto',
             'detalles.*.cantidad' => 'required|integer|min:1|max:2147483647',
         ]);
 
         try {
-            // Usamos una transacción para asegurar la integridad total de la venta y el stock
             $resultado = DB::transaction(function () use ($request) {
-
-                // 1. Buscar el cliente por RUT o crearlo automáticamente si es nuevo en el sistema
                 $cliente = Cliente::firstOrCreate(
                     ['rut' => $request->rut],
                     [
@@ -49,7 +43,6 @@ class VentaController extends Controller
                     ]
                 );
 
-                // Actualizamos los datos por si el cliente ya existía y vino con información nueva
                 $cliente->update([
                     'nombre' => $request->nombre_cliente,
                     'correo' => $request->correo_cliente ?? $cliente->correo,
@@ -60,35 +53,33 @@ class VentaController extends Controller
                 $neto = 0;
                 $detallesCalculados = [];
 
-                // 2. Calcular subtotales, total neto y validar stock disponible de los repuestos
-                foreach ($request->detalles as $item) {
-                    $producto = Producto::findOrFail($item['id_producto']);
+                $cantidades = collect($request->detalles)->groupBy('id_producto')->map(fn ($items): int => $items->sum('cantidad'));
+                foreach ($cantidades as $idProducto => $cantidad) {
+                    $producto = Producto::query()->whereKey($idProducto)->lockForUpdate()->firstOrFail();
 
-                    if ($producto->stock < $item['cantidad']) {
+                    if ($producto->stock < $cantidad) {
                         throw new \Exception("Stock insuficiente para el producto: {$producto->nombre}");
                     }
 
-                    $subtotal = $producto->precio * $item['cantidad'];
+                    $subtotal = $producto->precio * $cantidad;
                     $neto += $subtotal;
 
                     $detallesCalculados[] = [
                         'producto' => $producto,
-                        'cantidad' => $item['cantidad'],
+                        'cantidad' => $cantidad,
                         'precio_unitario' => $producto->precio,
                         'subtotal' => $subtotal,
                     ];
                 }
 
-                // Cálculo de IVA (19% en Chile) y Total
                 $totalBruto = $neto;
                 $montoNeto = round($totalBruto / 1.19, 2);
                 $montoIva = round($totalBruto - $montoNeto, 2);
 
-                // 3. Crear la Venta principal asociada al cliente sincronizado
                 $venta = Venta::create([
                     'fecha' => now(),
                     'tipo_documento' => $request->tipo_documento,
-                    'folio_sii' => null, // Se asignará al timbrar electrónicamente con el SII
+                    'folio_sii' => null,
                     'neto' => $montoNeto,
                     'iva' => $montoIva,
                     'total' => $totalBruto,
@@ -98,7 +89,6 @@ class VentaController extends Controller
                     'id_cliente' => $cliente->id_cliente,
                 ]);
 
-                // 4. Registrar los detalles y descontar el stock del inventario
                 foreach ($detallesCalculados as $det) {
                     DetalleVenta::create([
                         'id_venta' => $venta->id_venta,
@@ -108,7 +98,6 @@ class VentaController extends Controller
                         'subtotal' => $det['subtotal'],
                     ]);
 
-                    // Descontar stock
                     $stockAnterior = $det['producto']->stock;
                     $det['producto']->decrement('stock', $det['cantidad']);
                     InventarioMovimiento::create([
@@ -142,8 +131,10 @@ class VentaController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            Log::error('No se pudo registrar la venta.', ['exception' => $e]);
+
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'No se pudo registrar la venta. Verifica los datos e inténtalo nuevamente.',
             ], 400);
         }
     }

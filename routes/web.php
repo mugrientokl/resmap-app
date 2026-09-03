@@ -45,15 +45,13 @@ Route::middleware([
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->middleware('auth')->name('notificaciones.index');
     Route::post('/notificaciones/{id}/leer', [NotificacionController::class, 'read'])->middleware('auth')->name('notificaciones.read');
 
-    // Rutas para Categorías
     Route::get('/categorias', [CategoriaController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('categorias.index');
-    Route::get('/categorias/crear', [CategoriaController::class, 'create'])->middleware(['auth', 'role:Administrador'])->name('categorias.create');
+    Route::get('/categorias/crear', fn () => abort(404))->middleware(['auth', 'role:Administrador'])->name('categorias.create');
     Route::post('/categorias', [CategoriaController::class, 'store'])->middleware(['auth', 'role:Administrador'])->name('categorias.store');
-    Route::get('/categorias/{id}/editar', [CategoriaController::class, 'edit'])->middleware(['auth', 'role:Administrador'])->name('categorias.edit');
+    Route::get('/categorias/{id}/editar', fn () => abort(404))->middleware(['auth', 'role:Administrador'])->name('categorias.edit');
     Route::put('/categorias/{id}', [CategoriaController::class, 'update'])->middleware(['auth', 'role:Administrador'])->name('categorias.update');
     Route::delete('/categorias/{id}', [CategoriaController::class, 'destroy'])->middleware(['auth', 'role:Administrador'])->name('categorias.destroy');
 
-    // Rutas para Productos (Inventario de repuestos)
     Route::get('/productos', [ProductoController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.index');
     Route::get('/productos/exportar/excel', [ProductoController::class, 'exportarExcel'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.exportar.excel');
     Route::get('/productos/exportar/pdf', [ProductoController::class, 'exportarPdf'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('productos.exportar.pdf');
@@ -65,13 +63,11 @@ Route::middleware([
     Route::put('/productos/{id}', [ProductoController::class, 'update'])->middleware(['auth', 'role:Administrador'])->name('productos.update');
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->middleware(['auth', 'role:Administrador'])->name('productos.destroy');
 
-    // Rutas para Clientes
     Route::get('/clientes', [ClienteController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('clientes.index');
     Route::get('/clientes/{id}/editar', [ClienteController::class, 'edit'])->middleware(['auth', 'role:Administrador'])->name('clientes.edit');
     Route::put('/clientes/{id}', [ClienteController::class, 'update'])->middleware(['auth', 'role:Administrador'])->name('clientes.update');
     Route::delete('/clientes/{id}', [ClienteController::class, 'destroy'])->middleware(['auth', 'role:Administrador'])->name('clientes.destroy');
 
-    // Rutas para Ventas / POS (Boletas y Facturas DTE)
     Route::get('/pos', function (Request $request) {
         $categorias = Categoria::orderBy('nombre_categoria')->get();
         $productos = Producto::with('categoria')
@@ -101,16 +97,13 @@ Route::middleware([
     Route::get('/backups', [BackupController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('backups.index');
     Route::get('/backups/{filename}', [BackupController::class, 'download'])->middleware(['auth', 'role:Administrador'])->name('backups.download');
 
-    // Rutas para Detalles de Venta
     Route::get('/detalle-ventas', [DetalleVentaController::class, 'index'])->middleware(['auth', 'role:Administrador']);
     Route::get('/detalle-ventas/{id}', [DetalleVentaController::class, 'show'])->middleware(['auth', 'role:Administrador']);
 
-    // Rutas para Solicitudes Web (E-commerce / Carritos)
     Route::get('/solicitudes-web', [SolicitudWebController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.index');
     Route::get('/solicitudes-web/{id}', [SolicitudWebController::class, 'show'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.show');
     Route::patch('/solicitudes-web/{id}/estado', [SolicitudWebController::class, 'actualizarEstado'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.estado');
 
-    // Rutas para Usuarios
     Route::get('/usuarios', [UserController::class, 'index'])->middleware(['auth', 'role:Administrador']);
     Route::post('/usuarios', [UserController::class, 'store'])->middleware(['auth', 'role:Administrador']);
 });

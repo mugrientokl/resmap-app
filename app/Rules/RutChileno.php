@@ -4,15 +4,9 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
 
 class RutChileno implements ValidationRule
 {
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
-     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $rut = strtoupper(preg_replace('/[^0-9K]/', '', (string) $value));

@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('ventas', function (Blueprint $table) {
             $table->id('id_venta');
             $table->dateTime('fecha');
-            $table->string('tipo_documento'); // Boleta Electrónica (39) o Factura Electrónica (33)
+            $table->string('tipo_documento');
             $table->integer('folio_sii')->nullable();
             $table->decimal('neto', 10, 2);
             $table->decimal('iva', 10, 2);
             $table->decimal('total', 10, 2);
-            $table->string('medio_pago'); // Efectivo, Débito, Transferencia, Fiado
+            $table->string('medio_pago');
             $table->string('estado_sii')->default('Emitido');
-            $table->unsignedBigInteger('user_id'); // Usuario de Laravel por defecto
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('id_cliente')->nullable();
-            
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('id_cliente')->references('id_cliente')->on('clientes')->onDelete('set null');
             $table->timestamps();

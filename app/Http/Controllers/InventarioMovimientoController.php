@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InventarioMovimiento;
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InventarioMovimientoController extends Controller
 {
@@ -38,17 +39,18 @@ class InventarioMovimientoController extends Controller
         $producto = Producto::findOrFail($validated['id_producto']);
         $stockAnterior = $producto->stock;
         $stockNuevo = $validated['stock_nuevo'];
-        $producto->update(['stock' => $stockNuevo]);
-
-        InventarioMovimiento::create([
-            'id_producto' => $producto->id_producto,
-            'user_id' => $request->user()->id,
-            'tipo' => 'ajuste',
-            'cantidad' => $stockNuevo - $stockAnterior,
-            'stock_anterior' => $stockAnterior,
-            'stock_nuevo' => $stockNuevo,
-            'motivo' => $validated['motivo'],
-        ]);
+        DB::transaction(function () use ($producto, $request, $stockNuevo, $stockAnterior, $validated): void {
+            $producto->update(['stock' => $stockNuevo]);
+            InventarioMovimiento::create([
+                'id_producto' => $producto->id_producto,
+                'user_id' => $request->user()->id,
+                'tipo' => 'ajuste',
+                'cantidad' => $stockNuevo - $stockAnterior,
+                'stock_anterior' => $stockAnterior,
+                'stock_nuevo' => $stockNuevo,
+                'motivo' => $validated['motivo'],
+            ]);
+        });
 
         return redirect()->route('inventario.movimientos')->with('success', 'Stock ajustado y movimiento registrado.');
     }

@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Panel Izquierdo: Selección de Productos -->
     <div class="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Punto de Venta (POS) - Repuestos</h2>
 
@@ -65,7 +64,6 @@
         </div>
     </div>
 
-    <!-- Panel Derecho: Cliente y Carro de Venta -->
     <div class="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-gray-800 mb-4">Datos del Cliente (Defontana)</h3>
@@ -194,21 +192,30 @@
         carro.forEach(item => {
             let subtotal = item.precio * item.cantidad;
             totalGeneral += subtotal;
-
-            tbody.innerHTML += `
-                <tr class="border-b">
-                    <td class="py-1">${item.nombre}</td>
-                    <td class="py-1 text-center">
-                        <button type="button" onclick="cambiarCantidad(${item.id_producto}, -1)" class="px-1 bg-gray-200 rounded">-</button>
-                        <span class="mx-1">${item.cantidad}</span>
-                        <button type="button" onclick="cambiarCantidad(${item.id_producto}, 1)" class="px-1 bg-gray-200 rounded">+</button>
-                    </td>
-                    <td class="py-1 text-right">$ ${subtotal.toLocaleString('es-CL')}</td>
-                    <td class="py-1 text-center">
-                        <button type="button" onclick="cambiarCantidad(${item.id_producto}, -${item.cantidad})" class="text-red-500 font-bold">×</button>
-                    </td>
-                </tr>
-            `;
+            let row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = '<td class="py-1"></td><td class="py-1 text-center"></td><td class="py-1 text-right"></td><td class="py-1 text-center"></td>';
+            row.children[0].textContent = item.nombre;
+            row.children[2].textContent = '$ ' + subtotal.toLocaleString('es-CL');
+            let decrease = document.createElement('button');
+            decrease.type = 'button';
+            decrease.className = 'px-1 bg-gray-200 rounded';
+            decrease.textContent = '-';
+            decrease.onclick = () => cambiarCantidad(item.id_producto, -1);
+            let increase = decrease.cloneNode(true);
+            increase.textContent = '+';
+            increase.onclick = () => cambiarCantidad(item.id_producto, 1);
+            let quantity = document.createElement('span');
+            quantity.className = 'mx-1';
+            quantity.textContent = item.cantidad;
+            row.children[1].append(decrease, quantity, increase);
+            let remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'text-red-500 font-bold';
+            remove.textContent = '×';
+            remove.onclick = () => cambiarCantidad(item.id_producto, -item.cantidad);
+            row.children[3].append(remove);
+            tbody.append(row);
         });
 
         let neto = Math.round(totalGeneral / 1.19);

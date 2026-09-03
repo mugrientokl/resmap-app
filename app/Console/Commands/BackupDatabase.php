@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Storage;
 #[Description('Crea una copia de respaldo de la base de datos')]
 class BackupDatabase extends Command
 {
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $disk = Storage::disk('local');
