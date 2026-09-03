@@ -227,7 +227,6 @@
         let datos = {
             tipo_documento: document.getElementById('tipo_documento').value,
             medio_pago: document.getElementById('medio_pago').value,
-            user_id: 1, // Usuario por defecto temporal
             rut: rut,
             nombre_cliente: nombre_cliente,
             correo_cliente: document.getElementById('correo_cliente').value,

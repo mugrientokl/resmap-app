@@ -4,7 +4,9 @@
 <div class="bg-white shadow-md rounded-lg overflow-hidden p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Inventario de Repuestos y Maquinaria</h2>
-        <a href="{{ route('productos.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Nuevo Repuesto</a>
+        @if(auth()->user()->rol === 'Administrador')
+            <a href="{{ route('productos.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium">+ Nuevo Repuesto</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -58,12 +60,16 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                        <form action="{{ route('productos.destroy', $producto->id_producto, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
-                        </form>
+                        @if(auth()->user()->rol === 'Administrador')
+                            <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                            <form action="{{ route('productos.destroy', $producto->id_producto, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                            </form>
+                        @else
+                            <span class="text-gray-400">Solo lectura</span>
+                        @endif
                     </td>
                 </tr>
                 @endforeach

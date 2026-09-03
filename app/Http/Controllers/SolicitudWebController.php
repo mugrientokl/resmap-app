@@ -9,7 +9,11 @@ class SolicitudWebController extends Controller
 {
     public function index()
     {
-        return response()->json(SolicitudWeb::with('cliente')->get());
+        $solicitudes = SolicitudWeb::with('cliente')->latest('fecha')->paginate(20);
+
+        return request()->expectsJson()
+            ? response()->json($solicitudes)
+            : view('solicitudes.index', compact('solicitudes'));
     }
 
     public function store(Request $request)
@@ -28,14 +32,14 @@ class SolicitudWebController extends Controller
 
         return response()->json([
             'message' => 'Solicitud web registrada con éxito.',
-            'solicitud' => $solicitud
+            'solicitud' => $solicitud,
         ], 201);
     }
 
     public function actualizarEstado(Request $request, $id)
     {
         $request->validate([
-            'estado' => 'required|string|in:Pendiente,Aprobado,Rechazado'
+            'estado' => 'required|string|in:Pendiente,Aprobado,Rechazado',
         ]);
 
         $solicitud = SolicitudWeb::findOrFail($id);
@@ -43,7 +47,7 @@ class SolicitudWebController extends Controller
 
         return response()->json([
             'message' => 'Estado de la solicitud actualizado.',
-            'solicitud' => $solicitud
+            'solicitud' => $solicitud,
         ]);
     }
 }
