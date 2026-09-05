@@ -36,20 +36,32 @@ class CatalogoController extends Controller
     public function storeRequest(Request $request)
     {
         $data = $request->validate([
-            'rut' => ['required', 'string', 'max:20', new RutChileno],
+            'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9]{7,8}-[0-9Kk]$/', new RutChileno],
             'nombre' => ['required', 'string', 'max:255'],
             'correo' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:50'],
+            'telefono' => ['required', 'regex:/^(?:\+?569)?[0-9]{8}$/'],
             'direccion' => ['nullable', 'string', 'max:255'],
             'detalles_productos' => ['required', 'array', 'min:1'],
             'detalles_productos.*.id_producto' => ['required', 'exists:productos,id_producto'],
-            'detalles_productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:2147483647'],
+            'detalles_productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:99'],
+        ], [
+            'rut.required' => 'Escribe tu RUT sin puntos y con guion, por ejemplo: 12345678-5.',
+            'rut.regex' => 'El RUT debe escribirse sin puntos y con guion, por ejemplo: 12345678-5.',
+            'nombre.required' => 'Escribe tu nombre o razón social.',
+            'correo.email' => 'Escribe un correo electrónico válido.',
+            'telefono.required' => 'Escribe los 8 dígitos de tu teléfono después de +569.',
+            'telefono.regex' => 'El teléfono debe contener 8 dígitos después de +569.',
+            'detalles_productos.required' => 'Agrega al menos un repuesto al carrito.',
+            'detalles_productos.min' => 'Agrega al menos un repuesto al carrito.',
         ]);
 
-        $solicitud = DB::transaction(function () use ($data): SolicitudWeb {
+        $telefono = preg_replace('/[^0-9]/', '', $data['telefono']);
+        $telefono = str_starts_with($telefono, '569') ? substr($telefono, 3) : $telefono;
+
+        $solicitud = DB::transaction(function () use ($data, $telefono): SolicitudWeb {
             $cliente = Cliente::updateOrCreate(['rut' => $data['rut']], [
                 'nombre' => $data['nombre'], 'correo' => $data['correo'] ?? null,
-                'telefono' => $data['telefono'] ?? null, 'direccion' => $data['direccion'] ?? null,
+                'telefono' => '+569'.$telefono, 'direccion' => $data['direccion'] ?? null,
             ]);
 
             return SolicitudWeb::create([

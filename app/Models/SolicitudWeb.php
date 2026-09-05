@@ -16,8 +16,13 @@ class SolicitudWeb extends Model
     protected $fillable = [
         'fecha',
         'estado',
+        'tipo_solicitud',
+        'tipo_servicio',
+        'descripcion_servicio',
         'id_cliente',
         'detalles_productos',
+        'observaciones',
+        'atendida_at',
         'observaciones',
         'atendida_at',
     ];

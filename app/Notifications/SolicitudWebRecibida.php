@@ -20,7 +20,9 @@ class SolicitudWebRecibida extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'tipo' => 'solicitud', 'titulo' => 'Nueva solicitud web',
+            'tipo' => 'solicitud',
+            'tipo_solicitud' => $this->solicitud->tipo_solicitud,
+            'titulo' => $this->solicitud->tipo_solicitud === 'servicio' ? 'Nuevo servicio solicitado' : 'Nueva solicitud web',
             'mensaje' => 'Solicitud #'.$this->solicitud->id_solicitud.' de '.$this->solicitud->cliente->nombre,
             'url' => route('solicitudes.show', $this->solicitud->id_solicitud),
         ];

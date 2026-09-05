@@ -7,7 +7,7 @@
         @forelse($notificaciones as $notificacion)
             @php($data = $notificacion->data)
             <div class="flex items-start justify-between gap-4 border-l-4 {{ $data['tipo'] === 'stock_critico' ? 'border-amber-400' : 'border-[#b52f25]' }} bg-white p-5 shadow-sm {{ $notificacion->read_at ? 'opacity-60' : '' }}">
-                <div><h2 class="font-bold text-gray-900">{{ $data['titulo'] }}</h2><p class="mt-1 text-sm text-gray-600">{{ $data['mensaje'] }}</p><p class="mt-2 text-xs text-gray-400">{{ $notificacion->created_at->diffForHumans() }}</p><a href="{{ $data['url'] ?? route('notificaciones.index') }}" class="mt-3 inline-block text-sm font-bold text-[#9f2f25] hover:text-[#721d18]">{{ $data['tipo'] === 'solicitud' ? 'Ver detalle del pedido →' : 'Ver inventario →' }}</a></div>
+                <div><h2 class="font-bold text-gray-900">{{ $data['titulo'] }}</h2><p class="mt-1 text-sm text-gray-600">{{ $data['mensaje'] }}</p><p class="mt-2 text-xs text-gray-400">{{ $notificacion->created_at->diffForHumans() }}</p><a href="{{ $data['url'] ?? route('notificaciones.index') }}" class="mt-3 inline-block text-sm font-bold text-[#9f2f25] hover:text-[#721d18]">{{ $data['tipo'] === 'solicitud' ? ($data['tipo_solicitud'] ?? 'pedido') === 'servicio' ? 'Ver detalle del servicio →' : 'Ver detalle del pedido →' : 'Ver inventario →' }}</a></div>
                 @if(!$notificacion->read_at)<form method="POST" action="{{ route('notificaciones.read', $notificacion->id) }}">@csrf<button class="text-sm font-semibold text-[#9f2f25] hover:text-[#721d18]">Marcar leído</button></form>@endif
             </div>
         @empty
