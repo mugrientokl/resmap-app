@@ -34,16 +34,16 @@
         </div>
     </form>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="mx-auto max-w-6xl overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-center">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Código</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Nombre</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Categoría</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Precio</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Stock</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Acciones</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -64,16 +64,16 @@
                             </span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    <td class="space-x-2 whitespace-nowrap px-6 py-4 text-center text-sm font-medium">
                         @if(auth()->user()->rol === 'Administrador')
-                            <a href="{{ route('productos.edit', $producto->id_producto) }}" class="text-[#9f2f25] hover:text-[#721d18]">Editar</a>
+                            <a href="{{ route('productos.edit', $producto->id_producto) }}" title="Editar producto" aria-label="Editar producto" class="inline-flex rounded-md p-2 text-[#9f2f25] hover:bg-[#f7e8e6] hover:text-[#721d18]"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.862 3.487 3.651 3.651M4 20h4l10.862-10.862a2.587 2.587 0 0 0-3.651-3.651L4.349 16.349A2 2 0 0 0 4 17.763V20Z" /></svg></a>
                             <form action="{{ route('productos.destroy', $producto->id_producto, absolute: false) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                                <button type="submit" title="Eliminar producto" aria-label="Eliminar producto" class="inline-flex rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-900"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 6 12 12M18 6 6 18" /></svg></button>
                             </form>
                         @endif
-                        <a href="{{ route('productos.etiqueta', $producto->id_producto) }}" target="_blank" class="text-[#9f2f25] hover:text-[#721d18]">Etiqueta</a>
+                        <a href="{{ route('productos.etiqueta', $producto->id_producto) }}" target="_blank" title="Ver etiqueta y código de barras" aria-label="Ver etiqueta y código de barras" class="inline-flex rounded-md p-2 text-[#9f2f25] hover:bg-[#f7e8e6] hover:text-[#721d18]"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5v4m0 6v4m4-14v14m4-14v4m0 6v4m4-14v14m4-14v4m0 6v4" /></svg></a>
                     </td>
                 </tr>
                 @endforeach

@@ -12,16 +12,16 @@
         </div>
     @endif
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="mx-auto max-w-7xl overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-center">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RUT</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Razón Social / Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dirección</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">RUT</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">Razón Social / Nombre</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">Correo</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">Teléfono</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">Dirección</th>
+                    <th class="px-6 py-3 text-xs font-medium uppercase text-gray-500">Acciones</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -32,12 +32,12 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cliente->correo ?? 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cliente->telefono ?? 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cliente->direccion ?? 'N/A' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <a href="{{ route('clientes.edit', $cliente->id_cliente) }}" class="text-[#9f2f25] hover:text-[#721d18]">Editar</a>
+                    <td class="space-x-2 whitespace-nowrap px-6 py-4 text-center text-sm font-medium">
+                        <a href="{{ route('clientes.edit', $cliente->id_cliente) }}" title="Editar cliente" aria-label="Editar cliente" class="inline-flex rounded-md p-2 text-[#9f2f25] hover:bg-[#f7e8e6] hover:text-[#721d18]"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.862 3.487 3.651 3.651M4 20h4l10.862-10.862a2.587 2.587 0 0 0-3.651-3.651L4.349 16.349A2 2 0 0 0 4 17.763V20Z" /></svg></a>
                         <form action="{{ route('clientes.destroy', $cliente->id_cliente) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Seguro que deseas eliminar este cliente?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                            <button type="submit" title="Eliminar cliente" aria-label="Eliminar cliente" class="inline-flex rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-900"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 6 12 12M18 6 6 18" /></svg></button>
                         </form>
                     </td>
                 </tr>
