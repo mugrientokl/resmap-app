@@ -10,6 +10,7 @@ use App\Http\Controllers\InventarioMovimientoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\SolicitudWebController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
@@ -35,6 +36,8 @@ Route::middleware([
     Route::get('/', [CatalogoController::class, 'home'])->name('home');
     Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
     Route::post('/catalogo/solicitudes', [CatalogoController::class, 'storeRequest'])->middleware('throttle:10,1')->name('catalogo.solicitudes.store');
+    Route::get('/servicios', [ServicioController::class, 'index'])->name('servicios.index');
+    Route::post('/servicios', [ServicioController::class, 'store'])->middleware('throttle:10,1')->name('servicios.store');
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
     Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');

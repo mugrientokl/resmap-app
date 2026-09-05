@@ -11,9 +11,9 @@ class NotificacionController extends Controller
 {
     public function index(Request $request)
     {
-        $this->notifyCriticalProducts();
+        $this->notifyCriticalProducts($request->user());
 
-        $notificaciones = $request->user()->notifications()->paginate(20);
+        $notificaciones = $request->user()->notifications()->latest()->paginate(20)->withQueryString();
 
         return view('notificaciones.index', compact('notificaciones'));
     }
@@ -25,19 +25,16 @@ class NotificacionController extends Controller
         return back();
     }
 
-    private function notifyCriticalProducts(): void
+    private function notifyCriticalProducts(User $usuario): void
     {
         $productos = Producto::whereColumn('stock', '<=', 'stock_critico')->get();
-        $usuarios = User::whereIn('rol', ['Administrador', 'Vendedor'])->get();
 
         foreach ($productos as $producto) {
-            foreach ($usuarios as $usuario) {
-                $existe = $usuario->notifications()->where('type', ProductoStockCritico::class)
-                    ->where('data->producto_id', $producto->id_producto)->whereNull('read_at')->exists();
+            $existe = $usuario->notifications()->where('type', ProductoStockCritico::class)
+                ->where('data->producto_id', $producto->id_producto)->whereNull('read_at')->exists();
 
-                if (! $existe) {
-                    $usuario->notify(new ProductoStockCritico($producto));
-                }
+            if (! $existe) {
+                $usuario->notify(new ProductoStockCritico($producto));
             }
         }
     }
