@@ -32,25 +32,14 @@
     </style>
 </head>
 <body class="bg-[#f7f3f0] font-sans antialiased text-[#241817]">
-    <nav class="fixed inset-x-0 top-0 z-40 bg-[#8f241d] text-white shadow-lg">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-            <a href="{{ route('home') }}" class="flex items-center" aria-label="Ir al inicio de Resmap">
-                <img src="{{ asset('images/resmap sin fondo.png') }}" alt="Resmap" class="brand-logo h-12 w-auto max-w-45 object-contain">
-            </a>
+    <nav class="bg-[#8f241d] text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{{ route('home') }}" class="text-xl font-bold tracking-wide">RESMAP SpA</a>
             @auth
-                @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
-                @php($pendingRequests = \App\Models\SolicitudWeb::where('estado', 'Pendiente')->count())
-                <button type="button" id="mobile-menu-button" class="rounded-md p-2 hover:bg-[#721d18] md:hidden" aria-controls="main-menu" aria-expanded="false" aria-label="Abrir menú">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
-            @endauth
-            @auth
-                <div id="main-menu" class="absolute left-0 right-0 top-full hidden bg-[#8f241d] px-4 pb-4 shadow-lg md:static md:flex md:items-center md:gap-4 md:bg-transparent md:p-0 md:shadow-none">
-                    <a href="{{ route('productos.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">Inventario</a>
-                    <a href="{{ route('pos.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">POS</a>
-                    <a href="{{ route('catalogo.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">Catálogo</a>
-                    <a href="{{ route('servicios.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">Servicios</a>
-                    <a href="{{ route('solicitudes.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">Solicitudes @if($pendingRequests)<span class="ml-1 rounded-full bg-[#ffd5c9] px-2 py-0.5 text-xs text-[#8f241d]">{{ $pendingRequests }}</span>@endif</a>
+                <div class="flex items-center gap-4 text-sm">
+                    <a href="{{ route('productos.index') }}" class="hover:text-[#ffd5c9]">Inventario</a>
+                    <a href="{{ route('pos.index') }}" class="hover:text-[#ffd5c9]">POS</a>
+                    <a href="{{ route('solicitudes.index') }}" class="hover:text-[#ffd5c9]">Solicitudes</a>
                     @if(auth()->user()->rol === 'Administrador')
                         <a href="{{ route('clientes.index') }}" class="block rounded px-3 py-2 text-sm hover:bg-[#721d18] hover:text-[#ffd5c9]">Clientes</a>
                     @endif
@@ -74,11 +63,7 @@
                     </div>
                 </div>
             @else
-                <div class="flex items-center gap-3 text-sm">
-                    <a href="{{ route('catalogo.index') }}" class="rounded px-3 py-2 hover:bg-[#721d18] hover:text-[#ffd5c9]">Catálogo</a>
-                                        <a href="{{ route('servicios.index') }}" class="rounded px-3 py-2 hover:bg-[#721d18] hover:text-[#ffd5c9]">Servicios</a>
-                    <a href="{{ route('login') }}" class="rounded px-3 py-2 hover:bg-[#721d18] hover:text-[#ffd5c9]">Acceso interno</a>
-                </div>
+                <a href="{{ route('login') }}" class="text-sm hover:text-[#ffd5c9]">Acceso interno</a>
             @endauth
         </div>
     </nav>
