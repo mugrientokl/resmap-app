@@ -12,7 +12,11 @@
     <form method="POST" action="{{ route('servicios.store') }}" class="grid gap-8 bg-white p-6 shadow-sm md:grid-cols-2 md:p-8">
         @csrf
         <div class="md:col-span-2"><h2 class="text-xl font-black text-[#8f241d]">¿Qué servicio necesitas?</h2></div>
+<<<<<<< HEAD
         <label class="block text-sm font-bold">Tipo de servicio<select name="tipo_servicio" required class="mt-2 w-full border border-[#d9aaa3] p-3"><option value="">Selecciona una opción</option>@foreach(['Mantención', 'Reparación', 'Soldadura'] as $tipo)<option value="{{ $tipo }}" @selected(old('tipo_servicio', $tipoServicioSeleccionado) === $tipo)>{{ $tipo }}</option>@endforeach</select></label>
+=======
+        <label class="block text-sm font-bold">Tipo de servicio<select name="tipo_servicio" required class="mt-2 w-full border border-[#d9aaa3] p-3"><option value="">Selecciona una opción</option>@foreach(['Mantención', 'Reparación', 'Soldadura'] as $tipo)<option value="{{ $tipo }}" @selected(old('tipo_servicio') === $tipo)>{{ $tipo }}</option>@endforeach</select></label>
+>>>>>>> 6bd4a393eaa1e25a3e69d1eb87c095bedcb53f31
         <label class="block text-sm font-bold md:col-span-2">Describe tu necesidad<textarea name="descripcion_servicio" required minlength="10" maxlength="3000" rows="5" placeholder="Ej.: mantención de maquinaria, soldadura de joystick..." class="mt-2 w-full border border-[#d9aaa3] p-3">{{ old('descripcion_servicio') }}</textarea></label>
         <div class="border-t border-[#e8c8c3] pt-6 md:col-span-2"><h2 class="text-xl font-black text-[#8f241d]">Tus datos</h2></div>
         <label class="block text-sm font-bold">RUT<input name="rut" value="{{ old('rut') }}" required placeholder="12345678-5" pattern="[0-9]{7,8}-[0-9Kk]" class="mt-2 w-full border border-[#d9aaa3] p-3"><span class="mt-1 block text-xs font-normal text-gray-500">Sin puntos y con guion.</span></label>

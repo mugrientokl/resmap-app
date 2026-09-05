@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ServicioController extends Controller
 {
+<<<<<<< HEAD
     public function index(Request $request)
     {
         $tiposServicio = ['Mantención', 'Reparación', 'Soldadura'];
@@ -20,6 +21,11 @@ class ServicioController extends Controller
         return view('servicios.index', [
             'tipoServicioSeleccionado' => in_array($tipoServicio, $tiposServicio, true) ? $tipoServicio : null,
         ]);
+=======
+    public function index()
+    {
+        return view('servicios.index');
+>>>>>>> 6bd4a393eaa1e25a3e69d1eb87c095bedcb53f31
     }
 
     public function store(Request $request)

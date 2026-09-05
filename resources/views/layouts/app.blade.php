@@ -10,6 +10,7 @@
         [x-cloak] { display: none !important; }
 
         body { padding-top: 76px; }
+<<<<<<< HEAD
         body.homepage { padding-top: 0; }
 
         :root { --content-gutter: clamp(1rem, 10vw, 5cm); }
@@ -40,6 +41,8 @@
             padding-left: 0;
             padding-right: 0;
         }
+=======
+>>>>>>> 6bd4a393eaa1e25a3e69d1eb87c095bedcb53f31
 
         nav[role="navigation"] a,
         nav[role="navigation"] span {
@@ -114,7 +117,11 @@
         </div>
     </nav>
 
+<<<<<<< HEAD
     <main class="mx-auto min-h-[calc(100vh-140px)] py-6">
+=======
+    <main class="mx-auto min-h-[calc(100vh-140px)] max-w-7xl px-4 py-6">
+>>>>>>> 6bd4a393eaa1e25a3e69d1eb87c095bedcb53f31
         @yield('content')
     </main>
     <footer class="mt-8 border-t border-[#e8c8c3] bg-white px-4 py-5 text-center text-sm text-gray-600">
