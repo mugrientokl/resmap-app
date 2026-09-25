@@ -45,8 +45,11 @@ class CatalogoController extends Controller
             'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9]{7,8}-[0-9Kk]$/', new RutChileno],
             'nombre' => ['required', 'string', 'max:255'],
             'correo' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['required', 'regex:/^(?:\+?569)?[0-9]{8}$/'],
+            'prefijo_telefono' => ['required', 'regex:/^\+[1-9][0-9]{0,4}$/'],
+            'telefono' => ['required', 'regex:/^[0-9]{8}$/'],
             'direccion' => ['nullable', 'string', 'max:255'],
+            'region' => ['required', 'string', 'max:100'],
+            'comuna' => ['required', 'string', 'max:100'],
             'detalles_productos' => ['required', 'array', 'min:1'],
             'detalles_productos.*.id_producto' => ['required', 'exists:productos,id_producto'],
             'detalles_productos.*.cantidad' => ['required', 'integer', 'min:1', 'max:99'],
@@ -55,19 +58,19 @@ class CatalogoController extends Controller
             'rut.regex' => 'El RUT debe escribirse sin puntos y con guion, por ejemplo: 12345678-5.',
             'nombre.required' => 'Escribe tu nombre o razón social.',
             'correo.email' => 'Escribe un correo electrónico válido.',
-            'telefono.required' => 'Escribe los 8 dígitos de tu teléfono después de +569.',
-            'telefono.regex' => 'El teléfono debe contener 8 dígitos después de +569.',
+            'telefono.required' => 'Escribe los 8 dígitos de tu teléfono.',
+            'telefono.regex' => 'El teléfono debe contener exactamente 8 dígitos.',
             'detalles_productos.required' => 'Agrega al menos un repuesto al carrito.',
             'detalles_productos.min' => 'Agrega al menos un repuesto al carrito.',
         ]);
 
-        $telefono = preg_replace('/[^0-9]/', '', $data['telefono']);
-        $telefono = str_starts_with($telefono, '569') ? substr($telefono, 3) : $telefono;
+        $telefono = $data['prefijo_telefono'].$data['telefono'];
 
         $solicitud = DB::transaction(function () use ($data, $telefono): SolicitudWeb {
             $cliente = Cliente::updateOrCreate(['rut' => $data['rut']], [
                 'nombre' => $data['nombre'], 'correo' => $data['correo'] ?? null,
-                'telefono' => '+569'.$telefono, 'direccion' => $data['direccion'] ?? null,
+                'telefono' => $telefono, 'direccion' => $data['direccion'] ?? null,
+                'region' => $data['region'], 'comuna' => $data['comuna'], 'ciudad' => $data['comuna'],
             ]);
 
             return SolicitudWeb::create([
@@ -75,6 +78,12 @@ class CatalogoController extends Controller
                 'detalles_productos' => $data['detalles_productos'],
             ]);
         });
+
+        $cantidadesSolicitadas = collect($data['detalles_productos'])
+            ->groupBy('id_producto')
+            ->map(fn ($detalles): int => $detalles->sum(fn (array $detalle): int => (int) $detalle['cantidad']));
+        $productos = Producto::whereIn('id_producto', $cantidadesSolicitadas->keys())->get()->keyBy('id_producto');
+        $faltantes = $cantidadesSolicitadas->filter(fn (int $cantidad, $idProducto): bool => $cantidad > (int) ($productos->get($idProducto)?->stock ?? 0));
 
         User::whereIn('rol', ['Administrador', 'Vendedor'])->get()->each(function (User $user) use ($solicitud): void {
             try {
@@ -88,6 +97,11 @@ class CatalogoController extends Controller
             }
         });
 
-        return redirect()->route('catalogo.index')->with('success', 'Solicitud enviada. El equipo de RESMAP se pondrá en contacto contigo.');
+        $mensaje = 'Solicitud enviada. El equipo de RESMAP se pondrá en contacto contigo.';
+        if ($faltantes->isNotEmpty()) {
+            $mensaje .= ' Algunos productos no tienen stock suficiente; la solicitud no reserva unidades y el plazo puede ser mayor.';
+        }
+
+        return redirect()->route('catalogo.index')->with('success', $mensaje);
     }
 }

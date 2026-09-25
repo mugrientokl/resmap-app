@@ -28,8 +28,11 @@ class ServicioController extends Controller
             'rut' => ['required', 'string', 'max:20', 'regex:/^[0-9]{7,8}-[0-9Kk]$/', new RutChileno],
             'nombre' => ['required', 'string', 'max:255'],
             'correo' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['required', 'regex:/^(?:\+?569)?[0-9]{8}$/'],
+            'prefijo_telefono' => ['required', 'regex:/^\+[1-9][0-9]{0,4}$/'],
+            'telefono' => ['required', 'regex:/^[0-9]{8}$/'],
             'direccion' => ['nullable', 'string', 'max:255'],
+            'region' => ['required', 'string', 'max:100'],
+            'comuna' => ['required', 'string', 'max:100'],
             'tipo_servicio' => ['required', 'in:Mantención,Reparación,Soldadura'],
             'descripcion_servicio' => ['required', 'string', 'min:10', 'max:3000'],
         ], [
@@ -37,22 +40,24 @@ class ServicioController extends Controller
             'rut.regex' => 'El RUT debe escribirse sin puntos y con guion, por ejemplo: 12345678-5.',
             'nombre.required' => 'Escribe tu nombre o razón social.',
             'correo.email' => 'Escribe un correo electrónico válido.',
-            'telefono.required' => 'Escribe los 8 dígitos de tu teléfono después de +569.',
-            'telefono.regex' => 'El teléfono debe contener 8 dígitos después de +569.',
+            'telefono.required' => 'Escribe los 8 dígitos de tu teléfono.',
+            'telefono.regex' => 'El teléfono debe contener exactamente 8 dígitos.',
             'tipo_servicio.required' => 'Selecciona el tipo de servicio.',
             'descripcion_servicio.required' => 'Describe el servicio que necesitas.',
             'descripcion_servicio.min' => 'Describe tu necesidad con al menos 10 caracteres.',
         ]);
 
-        $telefono = preg_replace('/[^0-9]/', '', $data['telefono']);
-        $telefono = str_starts_with($telefono, '569') ? substr($telefono, 3) : $telefono;
+        $telefono = $data['prefijo_telefono'].$data['telefono'];
 
         $solicitud = DB::transaction(function () use ($data, $telefono): SolicitudWeb {
             $cliente = Cliente::updateOrCreate(['rut' => $data['rut']], [
                 'nombre' => $data['nombre'],
                 'correo' => $data['correo'] ?? null,
-                'telefono' => '+569'.$telefono,
+                'telefono' => $telefono,
                 'direccion' => $data['direccion'] ?? null,
+                'region' => $data['region'],
+                'comuna' => $data['comuna'],
+                'ciudad' => $data['comuna'],
             ]);
 
             return SolicitudWeb::create([

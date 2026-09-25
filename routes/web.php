@@ -111,7 +111,7 @@ Route::middleware([
 
     Route::get('/solicitudes-web', [SolicitudWebController::class, 'index'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.index');
     Route::get('/solicitudes-web/{id}', [SolicitudWebController::class, 'show'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.show');
-    Route::get('/solicitudes-web/{id}/factura', [SolicitudWebController::class, 'descargarFactura'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.factura');
+    Route::get('/solicitudes-web/{id}/pdf', [SolicitudWebController::class, 'descargarSolicitudPdf'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.pdf');
     Route::patch('/solicitudes-web/{id}/estado', [SolicitudWebController::class, 'actualizarEstado'])->middleware(['auth', 'role:Administrador,Vendedor'])->name('solicitudes.estado');
 
     Route::get('/usuarios', [UserController::class, 'index'])->middleware(['auth', 'role:Administrador'])->name('usuarios.index');

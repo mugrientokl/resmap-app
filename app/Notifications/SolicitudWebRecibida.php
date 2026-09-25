@@ -47,6 +47,7 @@ class SolicitudWebRecibida extends Notification
                 'cliente' => $cliente,
                 'items' => $items,
                 'notifiable' => $notifiable,
+                'faltantes' => $this->faltantes(),
                 'logoUrl' => 'cid:resmap-logo',
                 'urlSolicitud' => route('solicitudes.show', $this->solicitud->id_solicitud),
             ])
@@ -57,12 +58,35 @@ class SolicitudWebRecibida extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $faltantes = $this->faltantes();
+
         return [
             'tipo' => 'solicitud',
             'tipo_solicitud' => $this->solicitud->tipo_solicitud,
             'titulo' => 'Nueva solicitud web',
-            'mensaje' => 'Solicitud #'.$this->solicitud->id_solicitud.' de '.$this->solicitud->cliente->nombre,
+            'mensaje' => 'Solicitud #'.$this->solicitud->id_solicitud.' de '.$this->solicitud->cliente->nombre.($faltantes ? ' requiere revisar disponibilidad de stock.' : ''),
+            'faltantes_stock' => $faltantes,
             'url' => route('solicitudes.show', $this->solicitud->id_solicitud),
         ];
+    }
+
+    private function faltantes(): array
+    {
+        $detalles = collect($this->solicitud->detalles_productos ?? [])
+            ->groupBy('id_producto')
+            ->map(fn ($items): int => $items->sum(fn (array $item): int => (int) ($item['cantidad'] ?? 0)));
+        $productos = Producto::whereIn('id_producto', $detalles->keys())->get()->keyBy('id_producto');
+
+        return $detalles->filter(function (int $cantidad, $idProducto) use ($productos): bool {
+            return $cantidad > (int) ($productos->get($idProducto)?->stock ?? 0);
+        })->map(function (int $cantidad, $idProducto) use ($productos): array {
+            $producto = $productos->get($idProducto);
+
+            return [
+                'nombre' => $producto?->nombre ?? 'Producto no disponible',
+                'solicitado' => $cantidad,
+                'disponible' => (int) ($producto?->stock ?? 0),
+            ];
+        })->values()->all();
     }
 }

@@ -10,14 +10,16 @@ class DetalleVenta extends Model
     use HasFactory;
 
     protected $table = 'detalle_ventas';
+
     protected $primaryKey = 'id_detalle';
 
     protected $fillable = [
         'id_venta',
         'id_producto',
+        'descripcion',
         'cantidad',
         'precio_unitario',
-        'subtotal'
+        'subtotal',
     ];
 
     public function venta()

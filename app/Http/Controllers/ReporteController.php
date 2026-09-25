@@ -21,7 +21,7 @@ class ReporteController extends Controller
         $ventasQuery = $this->ventasQuery($request, $desde, $hasta);
         $ventas = (clone $ventasQuery)->latest('fecha')->paginate(20, ['*'], 'ventas_page')->withQueryString();
         $resumen = (clone $ventasQuery)->selectRaw('COUNT(*) as cantidad, COALESCE(SUM(total), 0) as total, COALESCE(SUM(iva), 0) as iva')->first();
-        $pendientes = SolicitudWeb::whereIn('estado', ['Pendiente', 'Pendiente de pago'])->count();
+        $pendientes = SolicitudWeb::whereIn('estado', ['Pendiente', 'Pagado - pendiente de entrega', 'Entregado - pago pendiente'])->count();
         $auditorias = $this->auditoriasQuery($request);
         $usuarios = User::orderBy('name')->get(['id', 'name']);
         $modelos = Auditoria::query()->select('modelo')->distinct()->orderBy('modelo')->pluck('modelo');

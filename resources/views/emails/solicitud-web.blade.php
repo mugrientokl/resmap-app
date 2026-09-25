@@ -40,6 +40,17 @@
                                 </tr>
                             </table>
 
+                            @if($faltantes)
+                                <div style="margin-bottom:26px;border-left:4px solid #d97706;background:#fffbeb;padding:14px;color:#92400e;font-size:13px;line-height:1.5;">
+                                    <strong>Advertencia de disponibilidad:</strong> la solicitud supera el stock actual y no reserva unidades. Revisa estos productos antes de prometer una fecha de entrega:
+                                    <ul style="margin:8px 0 0;padding-left:20px;">
+                                        @foreach($faltantes as $faltante)
+                                            <li>{{ $faltante['nombre'] }}: solicitadas {{ $faltante['solicitado'] }}, disponibles {{ $faltante['disponible'] }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <h2 style="margin:0 0 12px;color:#17211f;font-size:18px;">Productos solicitados</h2>
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:26px;">
                                 <thead>

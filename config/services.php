@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'libredte' => [
+        'enabled' => env('DTE_ENABLED', false),
+        'mode' => env('DTE_MODE', 'simulation'),
+        'environment' => env('DTE_ENVIRONMENT', 'testing'),
+        'url' => env('LIBREDTE_URL'),
+        'api_key' => env('LIBREDTE_API_KEY'),
+        'rut_emisor' => env('LIBREDTE_RUT_EMISOR'),
+        'timeout' => (int) env('LIBREDTE_TIMEOUT', 30),
+    ],
+
 ];

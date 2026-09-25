@@ -81,37 +81,44 @@ class InventarioMovimientoController extends Controller
             'observaciones' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $producto = Producto::findOrFail($validated['id_producto']);
-        $stockAnterior = $producto->stock;
-        $tipo = $validated['tipo'] ?? 'ajuste';
-        $cantidad = match ($tipo) {
-            'adquisicion' => (int) $validated['cantidad'],
-            'merma' => -((int) $validated['cantidad']),
-            default => (int) $validated['stock_nuevo'] - $stockAnterior,
-        };
-        $stockNuevo = $stockAnterior + $cantidad;
+        try {
+            DB::transaction(function () use ($validated, $request): void {
+                $producto = Producto::query()
+                    ->whereKey($validated['id_producto'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $stockAnterior = $producto->stock;
+                $tipo = $validated['tipo'] ?? 'ajuste';
+                $cantidad = match ($tipo) {
+                    'adquisicion' => (int) $validated['cantidad'],
+                    'merma' => -((int) $validated['cantidad']),
+                    default => (int) $validated['stock_nuevo'] - $stockAnterior,
+                };
+                $stockNuevo = $stockAnterior + $cantidad;
 
-        if ($stockNuevo < 0) {
-            return redirect()->back()->withInput()->withErrors(['cantidad' => 'La merma no puede superar el stock disponible.']);
+                if ($stockNuevo < 0) {
+                    throw new \RuntimeException('La merma no puede superar el stock disponible.');
+                }
+
+                $producto->update(['stock' => $stockNuevo]);
+                InventarioMovimiento::create([
+                    'id_producto' => $producto->id_producto,
+                    'user_id' => $request->user()->id,
+                    'tipo' => $tipo,
+                    'cantidad' => $cantidad,
+                    'stock_anterior' => $stockAnterior,
+                    'stock_nuevo' => $stockNuevo,
+                    'motivo' => $validated['motivo'],
+                    'proveedor' => $validated['proveedor'] ?? null,
+                    'documento_proveedor' => $validated['documento_proveedor'] ?? null,
+                    'precio_entrada' => $validated['precio_entrada'] ?? null,
+                    'cantidad_adquirida' => $tipo === 'adquisicion' ? $validated['cantidad'] : null,
+                    'observaciones' => $validated['observaciones'] ?? null,
+                ]);
+            });
+        } catch (\RuntimeException $exception) {
+            return redirect()->back()->withInput()->withErrors(['cantidad' => $exception->getMessage()]);
         }
-
-        DB::transaction(function () use ($producto, $request, $stockNuevo, $stockAnterior, $validated, $tipo, $cantidad): void {
-            $producto->update(['stock' => $stockNuevo]);
-            InventarioMovimiento::create([
-                'id_producto' => $producto->id_producto,
-                'user_id' => $request->user()->id,
-                'tipo' => $tipo,
-                'cantidad' => $cantidad,
-                'stock_anterior' => $stockAnterior,
-                'stock_nuevo' => $stockNuevo,
-                'motivo' => $validated['motivo'],
-                'proveedor' => $validated['proveedor'] ?? null,
-                'documento_proveedor' => $validated['documento_proveedor'] ?? null,
-                'precio_entrada' => $validated['precio_entrada'] ?? null,
-                'cantidad_adquirida' => $tipo === 'adquisicion' ? $validated['cantidad'] : null,
-                'observaciones' => $validated['observaciones'] ?? null,
-            ]);
-        });
 
         return redirect()->route('inventario.movimientos')->with('success', 'Stock ajustado y movimiento registrado.');
     }

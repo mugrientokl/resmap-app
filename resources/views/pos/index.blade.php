@@ -77,6 +77,10 @@
                     <label class="block text-xs font-medium text-gray-700">Razón Social / Nombre</label>
                     <input type="text" id="nombre_cliente" placeholder="Constructora SpA" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm">
                 </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Giro</label>
+                    <input type="text" id="giro_cliente" placeholder="Comercio de repuestos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm">
+                </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700">Correo</label>
@@ -84,12 +88,29 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700">Teléfono</label>
-                        <input type="text" id="telefono_cliente" placeholder="+569..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm">
+                        <div class="mt-1 flex">
+                            <select id="prefijo_telefono_cliente" class="min-w-0 rounded-l-md border border-gray-300 bg-white p-2 text-sm" aria-label="Código de país"></select>
+                            <input type="text" id="telefono_cliente" placeholder="12345678" pattern="[0-9]{8}" maxlength="8" inputmode="numeric" class="min-w-0 flex-1 rounded-r-md border border-l-0 border-gray-300 p-2 text-sm">
+                        </div>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700">Dirección</label>
                     <input type="text" id="direccion_cliente" placeholder="Faena / Dirección" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Región</label>
+                        <select id="region_cliente" required class="mt-1 block w-full rounded-md border-gray-300 bg-white p-2 text-sm">
+                            <option value="">Selecciona una región</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Comuna</label>
+                        <select id="comuna_cliente" required disabled class="mt-1 block w-full rounded-md border-gray-300 bg-white p-2 text-sm">
+                            <option value="">Selecciona una comuna</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -153,6 +174,7 @@
     </div>
 </div>
 
+<script src="{{ asset('js/chile-location.js') }}"></script>
 <script>
     let carro = [];
 
@@ -240,14 +262,30 @@
             return;
         }
 
+        const telefonoLocal = document.getElementById('telefono_cliente').value;
+        const region = document.getElementById('region_cliente').value;
+        const comuna = document.getElementById('comuna_cliente').value;
+        if (!/^\d{8}$/.test(telefonoLocal)) {
+            alert('El teléfono debe contener exactamente 8 dígitos.');
+            return;
+        }
+        if (!region || !comuna) {
+            alert('Selecciona una región y una comuna.');
+            return;
+        }
+
         let datos = {
             tipo_documento: document.getElementById('tipo_documento').value,
             medio_pago: document.getElementById('medio_pago').value,
             rut: rut,
             nombre_cliente: nombre_cliente,
+            razon_social_cliente: nombre_cliente,
+            giro_cliente: document.getElementById('giro_cliente').value,
             correo_cliente: document.getElementById('correo_cliente').value,
-            telefono_cliente: document.getElementById('telefono_cliente').value,
+            telefono_cliente: document.getElementById('prefijo_telefono_cliente').value + telefonoLocal,
             direccion_cliente: document.getElementById('direccion_cliente').value,
+            region_cliente: region,
+            comuna_cliente: comuna,
             detalles: carro.map(i => ({ id_producto: i.id_producto, cantidad: i.cantidad }))
         };
 
@@ -314,5 +352,8 @@
 
         input.focus();
     }
+
+    inicializarUbicacionChile('region_cliente', 'comuna_cliente');
+    inicializarSelectorTelefono('prefijo_telefono_cliente', 'telefono_cliente');
 </script>
 @endsection

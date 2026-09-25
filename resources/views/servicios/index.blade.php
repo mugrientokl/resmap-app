@@ -18,9 +18,16 @@
         <label class="block text-sm font-bold">RUT<input name="rut" value="{{ old('rut') }}" required placeholder="12345678-5" pattern="[0-9]{7,8}-[0-9Kk]" class="mt-2 w-full border border-[#d9aaa3] p-3"><span class="mt-1 block text-xs font-normal text-gray-500">Sin puntos y con guion.</span></label>
         <label class="block text-sm font-bold">Nombre o razón social<input name="nombre" value="{{ old('nombre') }}" required class="mt-2 w-full border border-[#d9aaa3] p-3"></label>
         <label class="block text-sm font-bold">Correo<input name="correo" type="email" value="{{ old('correo') }}" placeholder="correo@ejemplo.cl" class="mt-2 w-full border border-[#d9aaa3] p-3"></label>
-        <label class="block text-sm font-bold">Teléfono<div class="mt-2 flex"><span class="flex items-center border border-r-0 border-[#d9aaa3] bg-[#f7e8e6] px-3 font-bold text-[#8f241d]">+569</span><input name="telefono" value="{{ old('telefono') }}" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" placeholder="12345678" class="min-w-0 flex-1 border border-[#d9aaa3] p-3"></div></label>
+        <div class="block text-sm font-bold"><label for="telefono">Teléfono</label><div class="mt-2 flex"><select id="prefijo_telefono" name="prefijo_telefono" required aria-label="Código de país"></select><input id="telefono" name="telefono" value="{{ old('telefono') }}" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" placeholder="12345678" class="min-w-0 flex-1 border border-[#d9aaa3] p-3"></div></div>
         <label class="block text-sm font-bold md:col-span-2">Dirección <span class="font-normal text-gray-500">(opcional)</span><input name="direccion" value="{{ old('direccion') }}" class="mt-2 w-full border border-[#d9aaa3] p-3"></label>
+        <label class="block text-sm font-bold">Región<select id="region_solicitud" name="region" required class="mt-2 w-full border border-[#d9aaa3] bg-white p-3"><option value="">Selecciona una región</option></select></label>
+        <label class="block text-sm font-bold">Comuna<select id="comuna_solicitud" name="comuna" required disabled class="mt-2 w-full border border-[#d9aaa3] bg-white p-3"><option value="">Selecciona una comuna</option></select></label>
         <div class="flex justify-end md:col-span-2"><button class="bg-[#b52f25] px-6 py-3 font-bold text-white hover:bg-[#8f241d]">Enviar solicitud de servicio</button></div>
     </form>
 </div>
+<script src="{{ asset('js/chile-location.js') }}"></script>
+<script>
+    inicializarSelectorTelefono('prefijo_telefono', 'telefono');
+    inicializarUbicacionChile('region_solicitud', 'comuna_solicitud', @json(old('region')), @json(old('comuna')));
+</script>
 @endsection

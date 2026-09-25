@@ -10,22 +10,28 @@ use App\Models\User;
 use App\Models\Venta;
 use App\Notifications\ProductoStockCritico;
 use App\Rules\RutChileno;
+use App\Services\Facturacion\LibreDteService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class VentaController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, LibreDteService $libreDteService): JsonResponse
     {
         $request->validate([
             'tipo_documento' => 'required|string|in:Boleta Electrónica,Factura Electrónica',
             'medio_pago' => 'required|string|in:Efectivo,Transferencia,Tarjeta',
             'rut' => ['required', 'string', 'max:20', new RutChileno],
             'nombre_cliente' => 'required|string|max:255',
+            'razon_social_cliente' => 'nullable|string|max:255',
+            'giro_cliente' => 'nullable|string|max:255',
             'correo_cliente' => 'nullable|email|max:255',
             'telefono_cliente' => 'nullable|string|max:50',
             'direccion_cliente' => 'nullable|string|max:255',
+            'region_cliente' => 'nullable|string|max:100',
+            'comuna_cliente' => 'nullable|string|max:100',
             'detalles' => 'required|array|min:1',
             'detalles.*.id_producto' => 'required|exists:productos,id_producto',
             'detalles.*.cantidad' => 'required|integer|min:1|max:2147483647',
@@ -37,17 +43,27 @@ class VentaController extends Controller
                     ['rut' => $request->rut],
                     [
                         'nombre' => $request->nombre_cliente,
+                        'razon_social' => $request->razon_social_cliente,
+                        'giro' => $request->giro_cliente,
                         'correo' => $request->correo_cliente,
                         'telefono' => $request->telefono_cliente,
                         'direccion' => $request->direccion_cliente,
+                        'region' => $request->region_cliente,
+                        'comuna' => $request->comuna_cliente,
+                        'ciudad' => $request->comuna_cliente,
                     ]
                 );
 
                 $cliente->update([
                     'nombre' => $request->nombre_cliente,
+                    'razon_social' => $request->razon_social_cliente ?? $cliente->razon_social,
+                    'giro' => $request->giro_cliente ?? $cliente->giro,
                     'correo' => $request->correo_cliente ?? $cliente->correo,
                     'telefono' => $request->telefono_cliente ?? $cliente->telefono,
                     'direccion' => $request->direccion_cliente ?? $cliente->direccion,
+                    'region' => $request->region_cliente ?? $cliente->region,
+                    'comuna' => $request->comuna_cliente ?? $cliente->comuna,
+                    'ciudad' => $request->comuna_cliente ?? $cliente->ciudad,
                 ]);
 
                 $neto = 0;
@@ -84,7 +100,8 @@ class VentaController extends Controller
                     'iva' => $montoIva,
                     'total' => $totalBruto,
                     'medio_pago' => $request->medio_pago,
-                    'estado_sii' => 'Emitido',
+                    'estado_sii' => 'Pendiente',
+                    'estado_dte' => 'pendiente',
                     'user_id' => $request->user()->id,
                     'id_cliente' => $cliente->id_cliente,
                 ]);
@@ -125,8 +142,10 @@ class VentaController extends Controller
                 }
             }
 
+            $resultado['dte'] = $libreDteService->emitir($resultado['venta']->load(['cliente', 'detalles.producto']));
+
             return response()->json([
-                'message' => 'Venta registrada con éxito, stock actualizado y cliente sincronizado.',
+                'message' => $resultado['dte']['message'] ?? 'Venta registrada con éxito, stock actualizado y cliente sincronizado.',
                 'resultado' => $resultado,
             ], 201);
 

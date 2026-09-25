@@ -37,7 +37,7 @@ class SolicitudWebController extends Controller
         return view('solicitudes.show', compact('solicitud', 'productos', 'totales'));
     }
 
-    public function descargarFactura($id)
+    public function descargarSolicitudPdf($id)
     {
         $solicitud = SolicitudWeb::with('cliente')->findOrFail($id);
         $productos = $this->productosDeSolicitud($solicitud);
@@ -45,7 +45,7 @@ class SolicitudWebController extends Controller
 
         return Pdf::loadView('solicitudes.factura-pdf', compact('solicitud', 'productos', 'totales'))
             ->setPaper('a4')
-            ->download('factura-final-solicitud-'.$solicitud->id_solicitud.'.pdf');
+            ->download('resumen-solicitud-'.$solicitud->id_solicitud.'.pdf');
     }
 
     private function productosDeSolicitud(SolicitudWeb $solicitud)
@@ -103,54 +103,74 @@ class SolicitudWebController extends Controller
     public function actualizarEstado(Request $request, $id)
     {
         $request->validate([
-            'estado' => 'required|string|in:Pendiente,Pendiente de pago,Pagado,Entregado,Rechazado',
+            'estado' => 'required|string|in:Pendiente,Pagado - pendiente de entrega,Entregado - pago pendiente,Entregado y completado,Rechazado',
             'observaciones' => 'nullable|string|max:2000',
         ]);
 
         $solicitud = SolicitudWeb::with('cliente')->findOrFail($id);
-        $venta = null;
+        $transiciones = [
+            'Pendiente' => ['Pagado - pendiente de entrega', 'Entregado - pago pendiente', 'Entregado y completado', 'Rechazado'],
+            'Pagado - pendiente de entrega' => ['Entregado y completado'],
+            'Entregado - pago pendiente' => ['Entregado y completado'],
+            'Entregado y completado' => [],
+            'Rechazado' => [],
+        ];
+        $estadoNuevo = $request->string('estado')->toString();
+
+        if (! in_array($estadoNuevo, $transiciones[$solicitud->estado] ?? [], true)) {
+            $mensaje = $solicitud->estado === 'Rechazado' || $solicitud->estado === 'Entregado'
+                ? 'La solicitud ya está cerrada y no admite más cambios.'
+                : "No se puede cambiar de {$solicitud->estado} a {$estadoNuevo}.";
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $mensaje], 422);
+            }
+
+            return redirect()->route('solicitudes.show', $solicitud)->withInput()->with('error', $mensaje);
+        }
 
         try {
-            DB::transaction(function () use ($request, $solicitud, &$venta): void {
+            DB::transaction(function () use ($request, $solicitud, $estadoNuevo): void {
                 $solicitud->update([
-                    'estado' => $request->estado,
+                    'estado' => $estadoNuevo,
                     'observaciones' => $request->observaciones,
-                    'atendida_at' => $request->estado === 'Entregado' ? now() : $solicitud->atendida_at,
+                    'atendida_at' => in_array($estadoNuevo, ['Entregado - pago pendiente', 'Entregado y completado'], true)
+                        ? now()
+                        : $solicitud->atendida_at,
                 ]);
 
-                if ($request->estado !== 'Entregado' || $solicitud->venta_id || $solicitud->tipo_solicitud === 'servicio') {
+                if ($estadoNuevo !== 'Entregado y completado' || $solicitud->venta_id) {
                     return;
                 }
 
                 $items = collect($solicitud->detalles_productos ?? [])
                     ->groupBy('id_producto')
                     ->map(fn ($detalles): int => $detalles->sum(fn (array $detalle): int => (int) $detalle['cantidad']));
-                $netoBruto = 0;
+                $total = 0;
                 $detallesVenta = [];
 
                 foreach ($items as $idProducto => $cantidad) {
                     $producto = Producto::query()->whereKey($idProducto)->lockForUpdate()->firstOrFail();
-
                     if ($producto->stock < $cantidad) {
                         throw new \RuntimeException("Stock insuficiente para {$producto->nombre}.");
                     }
 
                     $subtotal = (float) $producto->precio * $cantidad;
-                    $netoBruto += $subtotal;
+                    $total += $subtotal;
                     $detallesVenta[] = compact('producto', 'cantidad', 'subtotal');
                 }
 
-                $neto = round($netoBruto / 1.19, 2);
-                $iva = round($netoBruto - $neto, 2);
+                $neto = round($total / 1.19, 2);
                 $venta = Venta::create([
                     'fecha' => now(),
                     'tipo_documento' => 'Boleta Electrónica',
                     'folio_sii' => null,
                     'neto' => $neto,
-                    'iva' => $iva,
-                    'total' => $netoBruto,
-                    'medio_pago' => 'Transferencia',
-                    'estado_sii' => 'Emitido',
+                    'iva' => round($total - $neto, 2),
+                    'total' => $total,
+                    'medio_pago' => 'Pendiente de emisión',
+                    'estado_sii' => 'Pendiente',
+                    'estado_dte' => 'pendiente',
                     'user_id' => $request->user()->id,
                     'id_cliente' => $solicitud->id_cliente,
                 ]);
@@ -173,7 +193,7 @@ class SolicitudWebController extends Controller
                         'cantidad' => -$detalle['cantidad'],
                         'stock_anterior' => $stockAnterior,
                         'stock_nuevo' => $stockAnterior - $detalle['cantidad'],
-                        'motivo' => 'Venta generada desde solicitud entregada',
+                        'motivo' => 'Venta generada al completar solicitud',
                         'id_venta' => $venta->id_venta,
                     ]);
                 }
@@ -185,15 +205,11 @@ class SolicitudWebController extends Controller
                 return response()->json(['message' => $exception->getMessage()], 422);
             }
 
-            return redirect()->route('solicitudes.show', $solicitud)
-                ->withInput()
-                ->with('error', $exception->getMessage());
+            return redirect()->route('solicitudes.show', $solicitud)->withInput()->with('error', $exception->getMessage());
         }
 
         if (! $request->expectsJson()) {
-            $mensaje = $venta ? 'Solicitud entregada y venta registrada correctamente.' : 'Estado de la solicitud actualizado.';
-
-            return redirect()->route('solicitudes.show', $solicitud)->with('success', $mensaje);
+            return redirect()->route('solicitudes.show', $solicitud)->with('success', 'Estado de la solicitud actualizado.');
         }
 
         return response()->json([
